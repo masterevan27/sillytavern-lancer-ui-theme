@@ -36,8 +36,10 @@ const STYLE_ID = 'lancer_theme_factions';
  *   6 - the two message defaults moved off GMS: characters now read as pilots
  *       and your own messages as Union. Only replaces the superseded GMS
  *       values, so a deliberate choice survives.
+ *   7 - the AI GM card ships with a faction mapping. Only seeded where no
+ *       mapping has been made at all, so a curated list is never touched.
  */
-const SCHEMA_VERSION = 6;
+const SCHEMA_VERSION = 7;
 
 /** Lancer manufacturer / allegiance palette. Keys match --lcr-f-* in the theme CSS. */
 const FACTIONS = {
@@ -112,8 +114,13 @@ function defaultSettings() {
         schemaVersion: SCHEMA_VERSION,
         enabled: true,
         values,
-        /** @type {Record<string, string>} character name -> faction key */
-        factions: {},
+        /**
+         * Character name -> faction key. Seeded with the AI GM card from the
+         * NHP Uplink module, since the two are usually run together; delete
+         * the row in the panel if you do not use it.
+         * @type {Record<string, string>}
+         */
+        factions: { 'Lancer TTRPG AI GM': 'gms-bright' },
         /** faction for every user message that has no explicit name mapping */
         userFaction: 'union',
         /** faction for every character message that has no explicit mapping */
@@ -161,6 +168,9 @@ function getSettings() {
     if (stored < 6) {
         if (settings.defaultFaction === 'gms') settings.defaultFaction = defaults.defaultFaction;
         if (settings.userFaction === 'gms-bright') settings.userFaction = defaults.userFaction;
+    }
+    if (stored < 7 && settings.factions && Object.keys(settings.factions).length === 0) {
+        settings.factions = { ...defaults.factions };
     }
     settings.schemaVersion = SCHEMA_VERSION;
 
@@ -488,7 +498,7 @@ function buildSettingsPanel() {
     reset.addEventListener('click', () => {
         const fresh = defaultSettings();
         settings.values = fresh.values;
-        settings.factions = {};
+        settings.factions = { ...fresh.factions };
         settings.userFaction = fresh.userFaction;
         settings.defaultFaction = fresh.defaultFaction;
         applyAll();

@@ -35,7 +35,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
 
       # Root layout. Fails loudly rather than letting a reorganised tree ship.
       - name: Extension files are at the repo root

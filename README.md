@@ -3,6 +3,11 @@
 A SillyTavern UI theme built on COMP/CON's actual palette, plus a small
 extension that turns the theme's options into checkboxes and sliders.
 
+![A LANCER session in the theme, with the AI GM framed in GMS red and the pilot in Union teal](examples/Chat_Example1.png)
+
+Messages are colour-coded by Lancer manufacturer — assign a faction per
+character, or let the two defaults handle it.
+
 ## What's here
 
 | File | Purpose |
@@ -70,6 +75,14 @@ GMS, IPS-Northstar, Smith-Shimano, Harrison Armory, HORUS, Union, NHP, plus
 Hostile / Unaligned / Pilot slots.
 
 ## How the toggles work
+
+Everything the theme exposes, as it appears under **Extensions → Lancer
+Theme** — avatars, message panels, typography and atmosphere up top, then the
+palette swatches and faction assignments:
+
+| | |
+| --- | --- |
+| ![Top of the Lancer Theme panel: the master switch, avatar sizing, message panel options and typography controls](examples/Lancer_theme_settings_1.png) | ![Lower half of the panel: atmosphere toggles, palette swatches and the faction colour assignments](examples/Lancer_theme_settings_2.png) |
 
 The theme declares everything as CSS custom properties in its CONFIG block.
 The extension writes those same variables as inline styles on `<html>`, which
