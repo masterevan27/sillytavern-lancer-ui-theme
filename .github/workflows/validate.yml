@@ -1,0 +1,78 @@
+# Checks that this repo is installable, and that the generated theme has not
+# drifted from its source CSS.
+#
+# The two things that can silently break a user's install:
+#
+#   1. The extension half is installed by SillyTavern cloning this repo whole
+#      (src/endpoints/extensions.js clones the URL into extensions/<repo-name>
+#      and then reads manifest.json from the ROOT of what it cloned). So
+#      manifest.json, plus whatever its `js`/`css` fields name, have to sit at
+#      the repo root. Moving them into a subfolder breaks installation for
+#      everyone while looking perfectly tidy in the file tree.
+#
+#   2. `Lancer CompCon.json` is GENERATED from lancer-compcon.css by
+#      build-theme.js, but it is committed, because SillyTavern imports it as a
+#      file. Editing the CSS without rebuilding ships a theme that does not
+#      match its own source. Regenerating here and diffing catches that.
+#
+# Deliberately not checked: the manifest `version`. SillyTavern decides an
+# extension is out of date by comparing git HEAD against origin (see
+# checkIfRepoIsUpToDate), never by reading that field -- it is display text
+# only, so CI has no business enforcing it.
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Root layout. Fails loudly rather than letting a reorganised tree ship.
+      - name: Extension files are at the repo root
+        run: |
+          test -f manifest.json || { echo "::error::manifest.json must be at the repo root - SillyTavern reads it from the root of the clone"; exit 1; }
+          node -e '
+            const fs = require("fs");
+            const m = JSON.parse(fs.readFileSync("manifest.json", "utf8"));
+            let bad = false;
+            for (const field of ["display_name", "js", "version"]) {
+              if (!m[field]) { console.log(`::error::manifest.json is missing "${field}"`); bad = true; }
+            }
+            for (const field of ["js", "css"]) {
+              const file = m[field];
+              if (file && !fs.existsSync(file)) {
+                console.log(`::error::manifest.json "${field}" points at ${file}, which is not at the repo root`);
+                bad = true;
+              }
+            }
+            process.exit(bad ? 1 : 0);
+          '
+
+      # Parse only. The extension imports SillyTavern internals and touches
+      # `document`, so it cannot be executed off-browser -- but a syntax error
+      # would stop it loading, and that is worth catching here.
+      - name: Extension parses as an ES module
+        run: node --input-type=module --check < index.js
+
+      - name: Theme preset is valid JSON
+        run: node -e 'JSON.parse(require("fs").readFileSync("Lancer CompCon.json", "utf8"))'
+
+      # The real check: rebuild from the CSS and diff. A dirty tree here means
+      # someone edited lancer-compcon.css and forgot `node build-theme.js`.
+      - name: Theme preset is in sync with lancer-compcon.css
+        run: |
+          node build-theme.js
+          if ! git diff --exit-code -- "Lancer CompCon.json"; then
+            echo "::error::'Lancer CompCon.json' is stale. Run 'node build-theme.js' and commit the result."
+            exit 1
+          fi

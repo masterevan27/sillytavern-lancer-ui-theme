@@ -1,0 +1,133 @@
+/* Lancer Theme Controls - settings panel layout */
+
+.lancer-theme-drawer .lancer-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.lancer-theme-drawer .lancer-disabled .lancer-body {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.lancer-theme-drawer .lancer-section {
+    margin-top: 10px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid var(--lcr-border, var(--SmartThemeBorderColor));
+    color: var(--lcr-accent, var(--SmartThemeQuoteColor));
+    font-family: var(--lcr-font-mono, var(--monoFontFamily));
+    font-size: 0.85em;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.lancer-theme-drawer .lancer-hint {
+    font-size: 0.8em;
+    opacity: 0.6;
+    margin: 2px 0 4px 0;
+}
+
+.lancer-theme-drawer .lancer-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lancer-theme-drawer .lancer-row-range {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+}
+
+.lancer-theme-drawer .lancer-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1;
+    font-size: 0.9em;
+}
+
+.lancer-theme-drawer .lancer-readout {
+    font-family: var(--lcr-font-mono, var(--monoFontFamily));
+    font-size: 0.85em;
+    opacity: 0.7;
+}
+
+.lancer-theme-drawer .lancer-slider {
+    width: 100%;
+}
+
+.lancer-theme-drawer .lancer-color {
+    width: 46px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid var(--SmartThemeBorderColor);
+    background: none;
+    cursor: pointer;
+}
+
+.lancer-theme-drawer .lancer-hr {
+    width: 100%;
+    border: none;
+    border-top: 1px solid var(--SmartThemeBorderColor);
+    margin: 6px 0;
+}
+
+.lancer-theme-drawer .lancer-adder {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 6px;
+    align-items: center;
+}
+
+.lancer-theme-drawer .lancer-name-input {
+    flex: 1 1 120px;
+    min-width: 100px;
+}
+
+.lancer-theme-drawer .lancer-faction-select {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 120px;
+}
+
+.lancer-theme-drawer .lancer-faction-row {
+    padding: 2px 0;
+}
+
+.lancer-theme-drawer .lancer-swatch {
+    width: 10px;
+    height: 18px;
+    flex: 0 0 auto;
+    display: inline-block;
+}
+
+.lancer-theme-drawer .lancer-faction-name {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.9em;
+}
+
+.lancer-theme-drawer .lancer-remove,
+.lancer-theme-drawer .lancer-add {
+    flex: 0 0 auto;
+    padding: 2px 8px;
+    line-height: 1.6;
+    white-space: nowrap;
+}
+
+.lancer-theme-drawer .lancer-empty {
+    font-size: 0.8em;
+    opacity: 0.5;
+    padding: 4px 0;
+}
+
+.lancer-theme-drawer .lancer-reset {
+    margin-top: 12px;
+    align-self: flex-start;
+    white-space: nowrap;
+}

@@ -1,0 +1,648 @@
+/* =============================================================================
+   LANCER // COMPCON  -  SillyTavern theme
+   Palette lifted from the live COMP/CON app (its Vuetify theme tokens).
+   Every knob lives in the CONFIG block below. The "Lancer Theme" extension
+   writes these same variables onto :root, so you can drive them from the UI
+   instead of editing CSS. Editing here still works if you do not use it.
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   1. CONFIG  -  edit these, or use the extension's toggles
+   -------------------------------------------------------------------------- */
+:root {
+    /* --- COMP/CON core palette, read verbatim from .v-theme--gms_dark --- */
+    /* Chat surfaces run black rather than gms_dark's navy: #212121 is that
+       theme's own dark-panel / surface-variant, #424242 its pilot grey. */
+    --lcr-bg: #0D0D0D;          /* app background       */
+    --lcr-surface: #141414;     /* chat surface         */
+    --lcr-panel: #212121;       /* message / card panel */
+    --lcr-panel-hi: #2E2E2E;    /* raised panel         */
+    --lcr-border: #424242;      /* panel border         */
+    --lcr-text: #C9CBA3;        /* khaki body text      */
+    --lcr-subtle: #9E9E9E;      /* muted / narration    */
+    --lcr-stark: #FFFFFF;
+    --lcr-primary: #802932;     /* deep red app bar     */
+    --lcr-accent: #DD5562;      /* bright red accent    */
+    --lcr-teal: #48A6A7;        /* secondary            */
+    --lcr-core: #D4E157;        /* core power           */
+    --lcr-heat: #FF7043;
+    --lcr-hp: #0284FF;
+    --lcr-danger: #FF1744;
+
+    /* --- Faction palette: assign per character in the extension ---
+       The three GMS reds are the gms profile's own primary, primary-darken-1
+       and active tokens. */
+    --lcr-f-gms: #991E2A;       /* General Massive Systems */
+    --lcr-f-gms-bright: #D93F4E;/* GMS, active             */
+    --lcr-f-gms-deep: #7B0016;  /* GMS, darkened           */
+    --lcr-f-ipsn: #3E6FB0;      /* IPS-Northstar           */
+    --lcr-f-ssc: #6FBF44;       /* Smith-Shimano Corpro    */
+    --lcr-f-ha: #D67E08;        /* Harrison Armory         */
+    --lcr-f-horus: #8A63D2;     /* HORUS                   */
+    --lcr-f-union: #48A6A7;     /* Union                   */
+    --lcr-f-nhp: #0B9E8A;       /* NHP / comp casket       */
+    --lcr-f-enemy: #DD5562;     /* hostile                 */
+    --lcr-f-neutral: #9EA9AD;   /* unaligned               */
+    --lcr-f-core: #D4E157;      /* your pilot              */
+
+    /* --- Fonts --- */
+    --lcr-font-ui: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --lcr-font-mono: Consolas, "Courier New", ui-monospace, monospace;
+
+    /* --- TOGGLES: 1 = on, 0 = off --- */
+    --lcr-on-stripe: 1;         /* faction bar down the message edge */
+    --lcr-on-tint: 1;           /* faction tint in the message panel */
+    --lcr-on-brackets: 1;       /* corner brackets on message panels */
+    --lcr-on-glow: 1;           /* soft glow on names / accents      */
+    --lcr-on-scanlines: 0;      /* CRT scanline overlay              */
+    --lcr-on-grid: 1;           /* faint grid behind the chat        */
+    --lcr-on-hazard: 1;         /* hazard stripes on system messages */
+    --lcr-on-namerule: 1;       /* hairline under the name header    */
+    --lcr-on-avatar-frame: 1;   /* faction frame around the avatar   */
+
+    /* --- KEYWORD TOGGLES: "off" value given in the comment --- */
+    --lcr-caps: uppercase;              /* off: none                    */
+    --lcr-name-prefix: "// ";           /* off: ""                      */
+    --lcr-name-font: var(--lcr-font-mono);  /* off: var(--lcr-font-ui)  */
+    --lcr-avatar-notch: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%); /* off: none */
+
+    /* --- SIZES --- */
+    --lcr-avatar: 136px;        /* chat avatar width                        */
+    --lcr-avatar-ratio: 1.35;   /* height as a multiple of width (1 = square) */
+    --lcr-tint-strength: 0.14;  /* 0 - 0.5                        */
+    --lcr-stripe-width: 3px;
+    --lcr-scanline-strength: 0.05;
+    --lcr-grid-strength: 0.04;
+    --lcr-grid-color: #DD5562;  /* the grid ruled behind the chat */
+    --lcr-mes-gap: 10px;
+    /* Name size is a multiple of SillyTavern's own base font size, so the
+       Font Scale slider still governs the whole chat. 1.6 x 15px = 24px at
+       the default scale. Letter spacing is in em, so it follows along. */
+    --lcr-name-scale: 1.6;
+    --lcr-name-spacing: 0.16em;
+
+    /* --- derived --- */
+    --lcr-mes-accent: var(--lcr-f-gms);
+    --lcr-glow: calc(var(--lcr-on-glow) * 6px);
+    --lcr-name-size: calc(var(--mainFontSize) * var(--lcr-name-scale));
+    --lcr-grid-alpha: calc(var(--lcr-grid-strength) * var(--lcr-on-grid));
+    --lcr-grid-ink: color-mix(in srgb, var(--lcr-grid-color) calc(var(--lcr-grid-alpha) * 100%), transparent);
+}
+
+/* -----------------------------------------------------------------------------
+   2. Wire the palette into SillyTavern's own variables
+   -------------------------------------------------------------------------- */
+:root {
+    --mainFontFamily: var(--lcr-font-ui);
+    --monoFontFamily: var(--lcr-font-mono);
+    --SmartThemeBodyColor: var(--lcr-text);
+    --SmartThemeEmColor: var(--lcr-subtle);
+    --SmartThemeUnderlineColor: var(--lcr-accent);
+    --SmartThemeQuoteColor: var(--lcr-teal);
+    --SmartThemeBorderColor: var(--lcr-border);
+    --SmartThemeShadowColor: rgba(0, 0, 0, 0.75);
+    --interactable-outline-color: var(--lcr-accent);
+    --avatar-base-border-radius: 0px;
+    --avatar-base-border-radius-rounded: 0px;
+}
+
+body {
+    background-color: var(--lcr-bg);
+}
+
+/* -----------------------------------------------------------------------------
+   3. App chrome  -  top bar, drawers, panels, buttons, inputs
+   -------------------------------------------------------------------------- */
+#top-bar {
+    background-color: var(--lcr-bg);
+    border-bottom: 2px solid var(--lcr-primary);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+#top-settings-holder .drawer-icon {
+    color: var(--lcr-text);
+}
+
+#top-settings-holder .drawer-icon:hover,
+#top-settings-holder .drawer-icon.openIcon {
+    color: var(--lcr-accent);
+    text-shadow: 0 0 var(--lcr-glow) var(--lcr-accent);
+}
+
+.drawer-content,
+#floatingPrompt,
+#cfgConfig,
+.popup,
+#character_popup,
+#world_popup {
+    background-color: var(--lcr-surface);
+    border: 1px solid var(--lcr-border);
+    border-radius: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .5), 0 12px 32px rgba(0, 0, 0, .6);
+}
+
+/* section headers read like console labels */
+.inline-drawer-header,
+.inline-drawer-toggle,
+.drawer-content h3,
+.drawer-content h4 {
+    font-family: var(--lcr-font-mono);
+    text-transform: var(--lcr-caps);
+    letter-spacing: 0.1em;
+    color: var(--lcr-text);
+}
+
+.inline-drawer-header,
+.inline-drawer-toggle {
+    border-bottom: 1px solid var(--lcr-border);
+    padding-bottom: 3px;
+}
+
+/* hard-edged, stencilled buttons */
+.menu_button,
+.menu_button_icon {
+    background-color: var(--lcr-panel);
+    border: 1px solid var(--lcr-border);
+    border-radius: 0;
+    color: var(--lcr-text);
+    transition: background-color 120ms linear, border-color 120ms linear, color 120ms linear;
+}
+
+/*
+ * Type styling must skip icon buttons. A button that is BOTH .menu_button and
+ * .fa-solid carries the icon glyph on itself, not on a child, so setting
+ * font-family here would beat Font Awesome on source order and render every
+ * icon as tofu. SillyTavern also ships only fa-solid-900 - no regular webfont -
+ * so anything not at weight 900 is a blank box too.
+ */
+.menu_button:not([class*="fa-"]),
+.menu_button_icon:not([class*="fa-"]) {
+    font-family: var(--lcr-font-mono);
+    text-transform: var(--lcr-caps);
+    letter-spacing: 0.08em;
+}
+
+[class*="fa-"].menu_button,
+[class*="fa-"].menu_button_icon,
+.mes_button,
+.extraMesButtons > div {
+    font-weight: 900;
+}
+
+.menu_button:hover,
+.menu_button_icon:hover {
+    background-color: var(--lcr-primary);
+    border-color: var(--lcr-accent);
+    color: var(--lcr-stark);
+}
+
+.menu_button.toggleEnabled,
+.menu_button.selected {
+    background-color: var(--lcr-primary);
+    border-color: var(--lcr-accent);
+    color: var(--lcr-stark);
+}
+
+select,
+textarea,
+input[type="text"],
+input[type="search"],
+input[type="number"],
+input[type="password"],
+.text_pole,
+.select2-container .select2-selection {
+    background-color: var(--lcr-bg);
+    border: 1px solid var(--lcr-border);
+    border-radius: 0;
+    color: var(--lcr-text);
+}
+
+select:focus,
+textarea:focus,
+input:focus,
+.text_pole:focus {
+    border-color: var(--lcr-accent);
+    outline: none;
+    box-shadow: inset 0 0 0 1px var(--lcr-accent);
+}
+
+input[type="range"] {
+    accent-color: var(--lcr-accent);
+}
+
+/* scrollbars */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--lcr-border) transparent;
+}
+
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: var(--lcr-border);
+    border-radius: 0;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: var(--lcr-accent);
+}
+
+/* character list entries as data rows */
+.character_select,
+.group_select,
+.bogus_folder_select {
+    border-radius: 0;
+    border-left: 2px solid transparent;
+}
+
+.character_select:hover,
+.group_select:hover,
+.bogus_folder_select:hover {
+    border-left-color: var(--lcr-accent);
+    background-color: var(--lcr-panel);
+}
+
+/* -----------------------------------------------------------------------------
+   4. Chat surface + overlays
+   -------------------------------------------------------------------------- */
+#sheld {
+    border: 1px solid var(--lcr-border);
+    border-top: none;
+}
+
+#chat {
+    background-color: var(--lcr-surface);
+    background-image:
+        linear-gradient(var(--lcr-grid-ink) 1px, transparent 1px),
+        linear-gradient(90deg, var(--lcr-grid-ink) 1px, transparent 1px);
+    background-size: 48px 48px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    text-shadow: none;
+    padding-top: 6px;
+}
+
+/* CRT scanlines, off by default */
+#sheld::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    opacity: var(--lcr-on-scanlines);
+    background: repeating-linear-gradient(to bottom,
+            rgba(0, 0, 0, var(--lcr-scanline-strength)) 0px,
+            rgba(0, 0, 0, var(--lcr-scanline-strength)) 1px,
+            transparent 1px,
+            transparent 3px);
+}
+
+/* -----------------------------------------------------------------------------
+   5. Messages  -  the COMP/CON panel
+   -------------------------------------------------------------------------- */
+#chat .mes {
+    background-color: color-mix(in srgb,
+            var(--lcr-mes-accent) calc(var(--lcr-tint-strength) * var(--lcr-on-tint) * 100%),
+            var(--lcr-panel));
+    border: 1px solid var(--lcr-border);
+    border-left: calc(var(--lcr-stripe-width) * var(--lcr-on-stripe)) solid var(--lcr-mes-accent);
+    border-radius: 0;
+    margin: 0 6px var(--lcr-mes-gap) 6px;
+    padding: 10px 12px 6px 12px;
+    width: auto;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .4);
+}
+
+/* corner brackets, drawn in the message's faction colour */
+#chat .mes::before,
+#chat .mes::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
+    opacity: var(--lcr-on-brackets);
+    border-color: var(--lcr-mes-accent);
+    border-style: solid;
+    border-width: 0;
+}
+
+#chat .mes::before {
+    top: -1px;
+    right: -1px;
+    border-top-width: 2px;
+    border-right-width: 2px;
+}
+
+#chat .mes::after {
+    bottom: -1px;
+    right: -1px;
+    border-bottom-width: 2px;
+    border-right-width: 2px;
+}
+
+#chat .mes.last_mes {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--lcr-mes-accent) 40%, transparent);
+}
+
+/* --- name header --- */
+#chat .mes .ch_name {
+    border-bottom: calc(1px * var(--lcr-on-namerule)) solid color-mix(in srgb, var(--lcr-mes-accent) 45%, transparent);
+    padding-bottom: 3px;
+    margin-bottom: 6px;
+}
+
+#chat .mes .ch_name .name_text {
+    font-family: var(--lcr-name-font);
+    text-transform: var(--lcr-caps);
+    letter-spacing: var(--lcr-name-spacing);
+    font-weight: 700;
+    font-size: var(--lcr-name-size);
+    line-height: 1.15;
+    color: var(--lcr-mes-accent);
+    text-shadow: 0 0 var(--lcr-glow) color-mix(in srgb, var(--lcr-mes-accent) 60%, transparent);
+}
+
+#chat .mes .ch_name .name_text::before {
+    content: var(--lcr-name-prefix);
+    opacity: 0.55;
+}
+
+/* --- metadata line: timestamps, token counts, ids --- */
+#chat .mes .timestamp,
+#chat .mes .mesIDDisplay,
+#chat .mes .tokenCounterDisplay,
+#chat .mes .mes_timer {
+    font-family: var(--lcr-font-mono);
+    font-size: calc(var(--mainFontSize) * 0.62);
+    letter-spacing: 0.08em;
+    text-transform: var(--lcr-caps);
+    color: var(--lcr-subtle);
+    opacity: 0.75;
+}
+
+#chat .mes .mes_buttons .mes_button {
+    color: var(--lcr-subtle);
+}
+
+#chat .mes .mes_buttons .mes_button:hover {
+    color: var(--lcr-accent);
+}
+
+/* --- edit-mode controls -----------------------------------------------------
+   These carry .menu_button, so strip the panel chrome back off: inside a
+   message they should read as icons, not as a row of boxes. Colour-coded by
+   what they do - confirm, discard, destroy.
+   -------------------------------------------------------------------------- */
+#chat .mes .mes_edit_buttons .menu_button {
+    background: none;
+    border: none;
+    padding: 2px 5px;
+    margin: 0;
+    color: var(--lcr-subtle);
+    box-shadow: none;
+}
+
+#chat .mes .mes_edit_buttons .menu_button:hover {
+    background: none;
+    color: var(--lcr-stark);
+    text-shadow: 0 0 var(--lcr-glow) currentColor;
+}
+
+#chat .mes .mes_edit_buttons .mes_edit_done {
+    color: var(--lcr-core);
+}
+
+#chat .mes .mes_edit_buttons .mes_edit_cancel {
+    color: var(--lcr-subtle);
+}
+
+#chat .mes .mes_edit_buttons .mes_edit_delete {
+    color: var(--lcr-accent);
+}
+
+#chat .mes .mes_edit_buttons .mes_edit_delete:hover {
+    color: var(--lcr-danger);
+}
+
+/* the message body while it is being edited */
+#chat .mes .edit_textarea {
+    background-color: var(--lcr-bg);
+    border: 1px solid var(--lcr-border);
+    border-left: 3px solid var(--lcr-mes-accent);
+    border-radius: 0;
+    color: var(--lcr-text);
+    font-family: var(--lcr-font-ui);
+}
+
+#chat .mes .edit_textarea:focus {
+    border-color: var(--lcr-border);
+    border-left-color: var(--lcr-mes-accent);
+    box-shadow: none;
+    outline: 1px solid color-mix(in srgb, var(--lcr-mes-accent) 60%, transparent);
+}
+
+/* --- body copy --- */
+#chat .mes .mes_text {
+    color: var(--lcr-text);
+    line-height: 1.55;
+}
+
+#chat .mes .mes_text q,
+#chat .mes .mes_text q::before,
+#chat .mes .mes_text q::after {
+    color: var(--lcr-teal);
+    font-style: normal;
+}
+
+#chat .mes .mes_text em,
+#chat .mes .mes_text i {
+    color: var(--lcr-subtle);
+}
+
+#chat .mes .mes_text strong,
+#chat .mes .mes_text b {
+    color: var(--lcr-stark);
+}
+
+#chat .mes .mes_text code {
+    font-family: var(--lcr-font-mono);
+    background-color: var(--lcr-bg);
+    border: 1px solid var(--lcr-border);
+    border-radius: 0;
+    color: var(--lcr-core);
+}
+
+#chat .mes .mes_text blockquote {
+    border-left: 2px solid var(--lcr-teal);
+    background-color: rgba(0, 0, 0, .25);
+    margin-left: 0;
+    padding: 4px 10px;
+}
+
+#chat .mes .mes_text hr {
+    border: none;
+    border-top: 1px solid var(--lcr-border);
+}
+
+/* --- swipes --- */
+#chat .mes .swipe_left,
+#chat .mes .swipe_right {
+    color: var(--lcr-mes-accent);
+}
+
+.swipes-counter {
+    font-family: var(--lcr-font-mono);
+    color: var(--lcr-subtle);
+    letter-spacing: 0.1em;
+}
+
+/* --- reasoning block reads like a readout --- */
+.mes_reasoning_details {
+    border: 1px dashed var(--lcr-border);
+    border-radius: 0;
+    background-color: rgba(0, 0, 0, .2);
+}
+
+.mes_reasoning_header {
+    font-family: var(--lcr-font-mono);
+    text-transform: var(--lcr-caps);
+    letter-spacing: 0.1em;
+    color: var(--lcr-teal);
+}
+
+/* -----------------------------------------------------------------------------
+   6. Avatars  -  large, framed, notched
+   -------------------------------------------------------------------------- */
+#chat .mes .mesAvatarWrapper {
+    width: var(--lcr-avatar);
+    min-width: var(--lcr-avatar);
+    max-width: var(--lcr-avatar);
+    margin-right: 12px;
+}
+
+#chat .mes .avatar {
+    width: var(--lcr-avatar);
+    height: calc(var(--lcr-avatar) * var(--lcr-avatar-ratio));
+    min-width: var(--lcr-avatar);
+    border-radius: 0;
+    overflow: visible;
+    flex: unset;
+    position: relative;
+}
+
+#chat .mes .avatar img {
+    width: var(--lcr-avatar);
+    height: calc(var(--lcr-avatar) * var(--lcr-avatar-ratio));
+    object-fit: cover;
+    object-position: center top;
+    border-radius: 0;
+    border: calc(2px * var(--lcr-on-avatar-frame)) solid var(--lcr-mes-accent);
+    clip-path: var(--lcr-avatar-notch);
+    filter: saturate(1.05) contrast(1.03);
+}
+
+/* faction tick under the avatar */
+#chat .mes .avatar::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 40%;
+    height: 2px;
+    background-color: var(--lcr-mes-accent);
+    opacity: var(--lcr-on-avatar-frame);
+}
+
+#chat .mes.last_mes .mesAvatarWrapper {
+    padding-bottom: 0;
+}
+
+/* -----------------------------------------------------------------------------
+   7. Faction assignment
+   The extension appends generated rules in its own stylesheet, one per
+   character, e.g.:
+       #chat .mes[ch_name="Julian"] { --lcr-mes-accent: var(--lcr-f-horus); }
+   These are the defaults it falls back to.
+   -------------------------------------------------------------------------- */
+#chat .mes {
+    --lcr-mes-accent: var(--lcr-f-gms);
+}
+
+#chat .mes[is_user="true"] {
+    --lcr-mes-accent: var(--lcr-f-gms-bright);
+}
+
+#chat .mes[is_system="true"] {
+    --lcr-mes-accent: var(--lcr-f-neutral);
+}
+
+/* system / narrator messages get hazard tape */
+#chat .mes[is_system="true"] {
+    background-image: repeating-linear-gradient(45deg,
+            rgba(212, 225, 87, calc(0.05 * var(--lcr-on-hazard))) 0 8px,
+            transparent 8px 16px);
+}
+
+/* -----------------------------------------------------------------------------
+   8. Composer
+   -------------------------------------------------------------------------- */
+#send_form {
+    background-color: var(--lcr-bg);
+    border-top: 1px solid var(--lcr-border);
+    border-radius: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+#send_textarea {
+    background-color: var(--lcr-bg);
+    border: 1px solid var(--lcr-border);
+    border-radius: 0;
+    color: var(--lcr-text);
+    font-family: var(--lcr-font-ui);
+}
+
+#send_textarea:focus {
+    border-color: var(--lcr-accent);
+    box-shadow: inset 0 0 0 1px var(--lcr-accent);
+}
+
+#send_but,
+#options_button,
+#send_form .fa-solid {
+    color: var(--lcr-text);
+}
+
+#send_but:hover {
+    color: var(--lcr-accent);
+    text-shadow: 0 0 var(--lcr-glow) var(--lcr-accent);
+}
+
+/* -----------------------------------------------------------------------------
+   9. Misc: toasts, tags
+   -------------------------------------------------------------------------- */
+.toast {
+    border-radius: 0 !important;
+    border-left: 3px solid var(--lcr-accent) !important;
+    font-family: var(--lcr-font-ui);
+}
+
+.tag {
+    border-radius: 0;
+    border: 1px solid var(--lcr-border);
+    font-family: var(--lcr-font-mono);
+    text-transform: var(--lcr-caps);
+    letter-spacing: 0.06em;
+    font-size: 0.8em;
+}
+
+.hotswap .avatar {
+    border-radius: 0;
+}

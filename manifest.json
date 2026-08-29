@@ -1,0 +1,12 @@
+{
+    "display_name": "Lancer Theme Controls",
+    "loading_order": 200,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "masterevan27",
+    "version": "1.0.0",
+    "homePage": "https://github.com/masterevan27/sillytavern-lancer-ui-theme",
+    "auto_update": false
+}
