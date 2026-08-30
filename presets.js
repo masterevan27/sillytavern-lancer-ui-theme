@@ -27,64 +27,25 @@ export const PRESET_FORMAT = 'lancer-theme-preset';
 export const SCHEMA_VERSION = 8;
 
 /**
+ * The built-in a fresh install starts on, by name. Turning the extension's
+ * master switch off still falls back to the theme's own CSS values - this only
+ * decides which look the extension arrives wearing, and only on an install
+ * that has no stored settings at all.
+ */
+export const DEFAULT_PRESET_NAME = 'IPS-N // Cold Deck';
+
+/**
  * The presets seeded into a fresh install. `slug` names the generated file in
  * `presets/`; it is not part of the format, and matches what the extension
  * would name that preset on export.
  *
  * Each carries a complete `values` set rather than a diff, so switching
  * between presets never leaves a stray knob behind from the last one.
+ *
+ * DEFAULT_PRESET_NAME above is listed first, by convention; seeding is by
+ * name, so the order here is only for reading.
  */
 export const BUILTIN_PRESETS = [
-    {
-        slug: 'horus-deep-signal',
-        name: 'HORUS // Deep Signal',
-        schemaVersion: SCHEMA_VERSION,
-        defaultFaction: 'horus',
-        userFaction: 'nhp',
-        values: {
-            avatarSize: 136,
-            avatarHeight: 1.4,
-            avatarFrame: true,
-            avatarNotch: true,
-            stripe: true,
-            stripeWidth: 4,
-            stripeAngle: 180,
-            stripeFaction: false,
-            tint: true,
-            tintStrength: 0.2,
-            mesGradient: true,
-            mesGradientStrength: 0.5,
-            mesGradientAngle: 180,
-            brackets: true,
-            nameRule: true,
-            hazard: true,
-            mesGap: 12,
-            caps: true,
-            namePrefix: true,
-            monoNames: true,
-            nameScale: 1.55,
-            nameSpacing: 0.18,
-            glow: true,
-            grid: true,
-            gridStrength: 0.065,
-            scanlines: true,
-            scanStrength: 0.09,
-            scrollbar: 14,
-            colAccent: '#8A63D2',
-            colPrimary: '#3C2A63',
-            colCtlIdle: '#8A63D2',
-            colCtlActive: '#2BE08A',
-            colCtlActiveEdge: '#7CF5BC',
-            colPanel: '#14101F',
-            colMesGradient: '#1A0F2E',
-            colStripeFrom: '#8A63D2',
-            colStripeTo: '#2BE08A',
-            colBorder: '#3B2E5A',
-            colText: '#9FD8A8',
-            colGrid: '#8A63D2',
-            colScrollbar: '#4B2E83',
-        },
-    },
     {
         slug: 'ips-n-cold-deck',
         name: 'IPS-N // Cold Deck',
@@ -133,6 +94,56 @@ export const BUILTIN_PRESETS = [
             colText: '#D6E4EF',
             colGrid: '#4FA3E3',
             colScrollbar: '#1E5C8A',
+        },
+    },
+    {
+        slug: 'horus-deep-signal',
+        name: 'HORUS // Deep Signal',
+        schemaVersion: SCHEMA_VERSION,
+        defaultFaction: 'horus',
+        userFaction: 'nhp',
+        values: {
+            avatarSize: 136,
+            avatarHeight: 1.4,
+            avatarFrame: true,
+            avatarNotch: true,
+            stripe: true,
+            stripeWidth: 4,
+            stripeAngle: 180,
+            stripeFaction: false,
+            tint: true,
+            tintStrength: 0.2,
+            mesGradient: true,
+            mesGradientStrength: 0.5,
+            mesGradientAngle: 180,
+            brackets: true,
+            nameRule: true,
+            hazard: true,
+            mesGap: 12,
+            caps: true,
+            namePrefix: true,
+            monoNames: true,
+            nameScale: 1.55,
+            nameSpacing: 0.18,
+            glow: true,
+            grid: true,
+            gridStrength: 0.065,
+            scanlines: true,
+            scanStrength: 0.09,
+            scrollbar: 14,
+            colAccent: '#8A63D2',
+            colPrimary: '#3C2A63',
+            colCtlIdle: '#8A63D2',
+            colCtlActive: '#2BE08A',
+            colCtlActiveEdge: '#7CF5BC',
+            colPanel: '#14101F',
+            colMesGradient: '#1A0F2E',
+            colStripeFrom: '#8A63D2',
+            colStripeTo: '#2BE08A',
+            colBorder: '#3B2E5A',
+            colText: '#9FD8A8',
+            colGrid: '#8A63D2',
+            colScrollbar: '#4B2E83',
         },
     },
     {

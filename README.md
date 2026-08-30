@@ -8,10 +8,12 @@
 A SillyTavern UI theme built on COMP/CON's actual palette, plus a small
 extension that turns the theme's options into checkboxes and sliders.
 
-![A LANCER session in the theme, with the AI GM framed in GMS red and the pilot in Union teal](examples/Chat_Example1.png)
+![A LANCER session on the IPS-N // Cold Deck preset: the AI GM framed in GMS red, the pilot in Union teal, both on cold blue panels](examples/Preset_IPSN_Cold_Deck.png)
 
 Messages are colour-coded by Lancer manufacturer — assign a faction per
-character, or let the two defaults handle it.
+character, or let the two defaults handle it. Above is **IPS-N // Cold Deck**,
+the preset a fresh install starts on; two others ship alongside it, and the
+whole look is a dropdown away. See [Presets](#presets).
 
 Built alongside
 [**FoundryVTT → SillyTavern NHP Uplink**](https://github.com/masterevan27/foundryvtt-to-sillytavern-nhp-uplink),
@@ -75,11 +77,27 @@ install:
 
 | Preset | The look |
 | --- | --- |
+| **IPS-N // Cold Deck** | Cold blue, no glow, square avatars, faint grid. Reads as instrumentation. **The default** — a fresh install starts here. |
 | **HORUS // Deep Signal** | Purple and terminal green, scanlines on, heavy gradient. The loudest of the three. |
-| **IPS-N // Cold Deck** | Cold blue, no glow, square avatars, faint grid. Reads as instrumentation. |
 | **GMS // Field Manual** | Austere: no glow, no grid, no gradient, flat red-on-black. Closest to print. |
 
 They live in [`presets/`](presets) if you want to read one before importing it.
+
+<details>
+<summary><strong>The other two, in the same chat</strong></summary>
+
+Same three messages as the shot at the top of this page, so the difference is
+the preset and nothing else.
+
+**HORUS // Deep Signal**
+
+![The same chat on HORUS // Deep Signal: purple panels, terminal-green body text, scanlines over everything and notched avatar corners](examples/Preset_HORUS_Deep_Signal.png)
+
+**GMS // Field Manual**
+
+![The same chat on GMS // Field Manual: flat red on black, square avatars, no glow, no grid and no gradient](examples/Preset_GMS_Field_Manual.png)
+
+</details>
 
 <details>
 <summary><strong>Saving, sharing and importing</strong></summary>
@@ -94,6 +112,12 @@ Under **Extensions → Lancer Theme → Presets**:
   into a Discord message.
 - **Include the character list when saving** — off by default, so a shared
   preset carries the look and not your table's character names.
+
+A fresh install starts on **IPS-N // Cold Deck**, and that happens exactly
+once, on an install with nothing stored yet. An install that has been used
+before keeps whatever it was last set to. **Reset to theme defaults** still
+means the values `lancer-compcon.css` declares rather than that preset — pick
+it from the dropdown to come back to it.
 
 A preset does not carry the master switch, so importing one never silently
 turns the extension on or off. Anything a preset leaves out falls back to the
@@ -130,7 +154,8 @@ applied. The presets bundled here go through the same gate as a downloaded one.
 <summary><strong>Editing the bundled presets</strong></summary>
 
 `presets/*.json` is **generated**. The source is `presets.js`, which is what
-the extension itself loads; edit a preset there and rebuild:
+the extension itself loads — including `DEFAULT_PRESET_NAME`, the one line that
+decides which built-in a fresh install adopts. Edit a preset there and rebuild:
 
 ```
 node build-theme.js

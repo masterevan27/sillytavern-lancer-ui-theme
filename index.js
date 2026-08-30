@@ -15,7 +15,7 @@ import { eventSource, event_types, saveSettingsDebounced, characters } from '../
 import { extension_settings } from '../../../extensions.js';
 import { groups } from '../../../group-chats.js';
 import { power_user } from '../../../power-user.js';
-import { BUILTIN_PRESETS, PRESET_FORMAT, SCHEMA_VERSION } from './presets.js';
+import { BUILTIN_PRESETS, DEFAULT_PRESET_NAME, PRESET_FORMAT, SCHEMA_VERSION } from './presets.js';
 
 const MODULE = 'lancer_theme';
 const STYLE_ID = 'lancer_theme_factions';
@@ -223,7 +223,8 @@ function migrate(state) {
 }
 
 function getSettings() {
-    if (!extension_settings[MODULE]) {
+    const firstRun = !extension_settings[MODULE];
+    if (firstRun) {
         extension_settings[MODULE] = defaultSettings();
     }
     const settings = extension_settings[MODULE];
@@ -243,6 +244,9 @@ function getSettings() {
     }
 
     seedBuiltinPresets(settings);
+    if (firstRun) {
+        adoptDefaultPreset(settings);
+    }
     return settings;
 }
 
@@ -278,6 +282,22 @@ function seedBuiltinPresets(settings) {
             settings.presets[preset.name] = preset;
         }
     }
+}
+
+/**
+ * Put a brand-new install on the default built-in, so the extension arrives
+ * wearing a whole look rather than the bare option defaults. Only ever runs
+ * where nothing was stored at all, so an existing install keeps whatever it
+ * was last set to, and "Reset to theme defaults" still means the values the
+ * theme's own CSS declares.
+ */
+function adoptDefaultPreset(settings) {
+    const preset = settings.presets[DEFAULT_PRESET_NAME];
+    if (!preset) return;
+    settings.values = { ...settings.values, ...preset.values };
+    if (preset.defaultFaction) settings.defaultFaction = preset.defaultFaction;
+    if (preset.userFaction) settings.userFaction = preset.userFaction;
+    settings.activePreset = preset.name;
 }
 
 /**
