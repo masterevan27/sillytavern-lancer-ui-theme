@@ -8,6 +8,13 @@ extension that turns the theme's options into checkboxes and sliders.
 Messages are colour-coded by Lancer manufacturer — assign a faction per
 character, or let the two defaults handle it.
 
+Built alongside
+[**FoundryVTT → SillyTavern NHP Uplink**](https://github.com/masterevan27/foundryvtt-to-sillytavern-nhp-uplink),
+which streams live LANCER combat out of Foundry VTT into SillyTavern so a card
+can run as an AI GM. Neither needs the other — this is a plain SillyTavern theme
+— but the faction colouring was tuned for that kind of table. See
+[Companion project](#companion-project).
+
 ## What's here
 
 | File | Purpose |
@@ -50,6 +57,21 @@ node build-theme.js --install --st-root="D:/SillyTavern/data/default-user"
 
 `ST_ROOT` works as an environment variable instead. Without `--install` the
 script only regenerates `Lancer CompCon.json` next to itself.
+
+## Companion project
+
+[**FoundryVTT → SillyTavern NHP Uplink**](https://github.com/masterevan27/foundryvtt-to-sillytavern-nhp-uplink)
+turns a SillyTavern character card into an AI GM for a live LANCER game: a
+Foundry module streams the real combat — attacks, damage, structure, statuses,
+board state — into SillyTavern, the card narrates it, and its replies go back
+into Foundry chat. Foundry stays the authority on mechanics; the model only
+writes fiction.
+
+Neither project requires the other. The uplink runs under any SillyTavern theme,
+and this theme is just a theme without it. Together, the faction colours give you
+the AI GM, your pilots and the hostiles distinguishable at a glance mid-fight —
+which is what they were tuned for. Its README lists the theme as an optional
+install step.
 
 ## Palette
 
@@ -112,7 +134,11 @@ assigned the same way characters are.
 
 Copyright (C) 2026 masterevan27.
 
-GPL-3.0-or-later — see [LICENSE](LICENSE).
+GPL-3.0-or-later — see [LICENSE](LICENSE). This covers the theme and the
+"Lancer Theme Controls" extension in this repository;
+[the uplink](https://github.com/masterevan27/foundryvtt-to-sillytavern-nhp-uplink)
+is a separate project in its own repository, under its own copy of the same
+licence.
 
 LANCER is a trademark of Massif Press. COMP/CON is their character builder; the
 palette here was read off its GMS dark theme. This is an unofficial community
