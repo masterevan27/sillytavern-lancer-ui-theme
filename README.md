@@ -1,5 +1,10 @@
 # Lancer // CompCon — SillyTavern theme
 
+[![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmasterevan27%2Fsillytavern-lancer-ui-theme%2Fmain%2Fmanifest.json&query=%24.version&style=for-the-badge&label=VERSION&color=DD5562)](manifest.json)
+[![Validate](https://img.shields.io/github/actions/workflow/status/masterevan27/sillytavern-lancer-ui-theme/validate.yml?branch=main&style=for-the-badge&label=VALIDATE)](https://github.com/masterevan27/sillytavern-lancer-ui-theme/actions/workflows/validate.yml)
+[![SillyTavern](https://img.shields.io/badge/SILLYTAVERN-THEME%20%2B%20EXTENSION-212D40?style=for-the-badge)](https://github.com/SillyTavern/SillyTavern)
+[![License](https://img.shields.io/badge/LICENSE-GPL--3.0--or--later-802932?style=for-the-badge)](LICENSE)
+
 A SillyTavern UI theme built on COMP/CON's actual palette, plus a small
 extension that turns the theme's options into checkboxes and sliders.
 
@@ -45,7 +50,8 @@ repo. Then select **Lancer CompCon** in the theme dropdown.
 
 Reload the browser after both steps.
 
-### Installing from a local clone
+<details>
+<summary><strong>Installing from a local clone (only if you are editing the CSS)</strong></summary>
 
 If you are editing the CSS, `--install` copies both halves straight into
 SillyTavern. Point it at your user-data directory — the folder containing
@@ -58,7 +64,12 @@ node build-theme.js --install --st-root="D:/SillyTavern/data/default-user"
 `ST_ROOT` works as an environment variable instead. Without `--install` the
 script only regenerates `Lancer CompCon.json` next to itself.
 
+</details>
+
 ## Companion project
+
+<details>
+<summary><strong>Turning a SillyTavern character card into an AI GM for a live LANCER game</strong></summary>
 
 [**FoundryVTT → SillyTavern NHP Uplink**](https://github.com/masterevan27/foundryvtt-to-sillytavern-nhp-uplink)
 turns a SillyTavern character card into an AI GM for a live LANCER game: a
@@ -73,12 +84,17 @@ the AI GM, your pilots and the hostiles distinguishable at a glance mid-fight �
 which is what they were tuned for. Its README lists the theme as an optional
 install step.
 
+</details>
+
 ## Palette
 
 Read verbatim off COMP/CON's `.v-theme--gms_dark` block — the app's default
 dark GMS theme — not eyeballed. (Its other registered themes are `gms`,
 `ipsn`, `ssc`, `ha`, `horus`, `msmc`, `galsim`, `horizon`, `hc_dark`,
 `theme_lc_solarized`, plus plain `light` / `dark`.)
+
+<details>
+<summary><strong>The nine tokens, and the faction colours</strong></summary>
 
 | Token | Hex | Use |
 | --- | --- | --- |
@@ -96,7 +112,12 @@ Faction colours for per-character message coding are the Lancer manufacturers:
 GMS, IPS-Northstar, Smith-Shimano, Harrison Armory, HORUS, Union, NHP, plus
 Hostile / Unaligned / Pilot slots.
 
+</details>
+
 ## How the toggles work
+
+<details>
+<summary><strong>The settings panel, in full</strong></summary>
 
 Everything the theme exposes, as it appears under **Extensions → Lancer
 Theme** — avatars, message panels, typography and atmosphere up top, then the
@@ -105,6 +126,11 @@ palette swatches and faction assignments:
 | | |
 | --- | --- |
 | ![Top of the Lancer Theme panel: the master switch, avatar sizing, message panel options and typography controls](examples/Lancer_theme_settings_1.png) | ![Lower half of the panel: atmosphere toggles, palette swatches and the faction colour assignments](examples/Lancer_theme_settings_2.png) |
+
+</details>
+
+<details>
+<summary><strong>Which CSS variables the extension writes</strong></summary>
 
 The theme declares everything as CSS custom properties in its CONFIG block.
 The extension writes those same variables as inline styles on `<html>`, which
@@ -117,9 +143,14 @@ nothing is hardcoded in the CSS beyond a default value:
   `--lcr-name-prefix: "// " | ""`)
 - sizes are plain lengths (`--lcr-avatar`, `--lcr-stripe-width`)
 
+</details>
+
 Turning the extension's master switch off removes every inline variable, so the
 theme falls back to what's written in `lancer-compcon.css`. Switching to a
 different SillyTavern theme drops the whole look regardless.
+
+<details>
+<summary><strong>Per-character colours, and how names are matched</strong></summary>
 
 Per-character colours are emitted as a generated stylesheet:
 
@@ -129,6 +160,8 @@ body #chat .mes[ch_name="Ledger"] { --lcr-mes-accent: var(--lcr-f-horus); }
 
 Matching is on the name shown in the message header, so personas can be
 assigned the same way characters are.
+
+</details>
 
 ## License
 
