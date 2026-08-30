@@ -145,6 +145,36 @@ nothing is hardcoded in the CSS beyond a default value:
 
 </details>
 
+<details>
+<summary><strong>The panel gradient, and the two control states</strong></summary>
+
+**Message panels** take a colour wash: it starts at that message's own faction
+tint and runs to a second colour at the far corner, so a panel reads as a
+gradient rather than one flat block. Four knobs drive it, under **Message
+panels** and **Palette**:
+
+| Variable | Default | Use |
+| --- | --- | --- |
+| `--lcr-on-mes-gradient` | `1` | off returns the flat faction tint |
+| `--lcr-mes-gradient-strength` | `0.35` | how much of the far colour lands at the far corner, 0 - 1 |
+| `--lcr-mes-gradient-angle` | `135deg` | direction of the wash |
+| `--lcr-mes-gradient-color` | `#8A63D2` | the far end |
+
+**Controls** — buttons, top-bar drawer icons, character rows, the composer and
+its send / options glyphs — sit red at rest and go purple when hovered or
+selected:
+
+| Variable | Default | Use |
+| --- | --- | --- |
+| `--lcr-ctl-idle` | `#DD5562` | border and glyph at rest |
+| `--lcr-ctl-active` | `#7A3FBF` | fill when hovered or selected |
+| `--lcr-ctl-active-edge` | `#B57BFF` | its border, text and glow |
+
+The purples are not COMP/CON tokens — they are HORUS-adjacent. Point all three
+at reds for the old single-hue chrome.
+
+</details>
+
 Turning the extension's master switch off removes every inline variable, so the
 theme falls back to what's written in `lancer-compcon.css`. Switching to a
 different SillyTavern theme drops the whole look regardless.
