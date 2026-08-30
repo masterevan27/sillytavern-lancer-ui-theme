@@ -75,6 +75,7 @@
     --lcr-grid-strength: 0.04;
     --lcr-grid-color: #DD5562;  /* the grid ruled behind the chat */
     --lcr-mes-gap: 10px;
+    --lcr-scrollbar: 14px;      /* scrollbar thickness             */
     /* Name size is a multiple of SillyTavern's own base font size, so the
        Font Scale slider still governs the whole chat. 1.6 x 15px = 24px at
        the default scale. Letter spacing is in em, so it follows along. */
@@ -233,20 +234,28 @@ input[type="range"] {
     accent-color: var(--lcr-accent);
 }
 
-/* scrollbars */
+/* scrollbars
+   Firefox only takes the auto/thin keywords, so it gets the wider of the two
+   and Chromium gets the exact --lcr-scrollbar width. */
 * {
-    scrollbar-width: thin;
+    scrollbar-width: auto;
     scrollbar-color: var(--lcr-border) transparent;
 }
 
 *::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: var(--lcr-scrollbar);
+    height: var(--lcr-scrollbar);
+}
+
+*::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, .35);
 }
 
 *::-webkit-scrollbar-thumb {
     background-color: var(--lcr-border);
     border-radius: 0;
+    border: 3px solid transparent;
+    background-clip: padding-box;
 }
 
 *::-webkit-scrollbar-thumb:hover {

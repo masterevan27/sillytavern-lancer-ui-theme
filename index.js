@@ -93,6 +93,7 @@ const OPTIONS = [
     { id: 'gridStrength', type: 'range', label: 'Grid strength', cssVar: '--lcr-grid-strength', min: 0, max: 0.2, step: 0.005, unit: '', def: 0.04 },
     { id: 'scanlines', type: 'bool', label: 'CRT scanlines', cssVar: '--lcr-on-scanlines', on: '1', off: '0', def: false },
     { id: 'scanStrength', type: 'range', label: 'Scanline strength', cssVar: '--lcr-scanline-strength', min: 0, max: 0.3, step: 0.005, unit: '', def: 0.05 },
+    { id: 'scrollbar', type: 'range', label: 'Scrollbar thickness', cssVar: '--lcr-scrollbar', min: 6, max: 24, step: 1, unit: 'px', def: 14 },
 
     { section: 'Palette' },
     { id: 'colAccent', type: 'color', label: 'Accent', cssVar: '--lcr-accent', def: '#DD5562' },
