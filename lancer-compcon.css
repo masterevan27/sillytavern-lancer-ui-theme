@@ -75,7 +75,7 @@
     --lcr-grid-strength: 0.04;
     --lcr-grid-color: #DD5562;  /* the grid ruled behind the chat */
     --lcr-mes-gap: 10px;
-    --lcr-scrollbar: 14px;      /* scrollbar thickness             */
+    --lcr-scrollbar: 16px;      /* scrollbar thickness             */
     /* Name size is a multiple of SillyTavern's own base font size, so the
        Font Scale slider still governs the whole chat. 1.6 x 15px = 24px at
        the default scale. Letter spacing is in em, so it follows along. */
@@ -235,8 +235,11 @@ input[type="range"] {
 }
 
 /* scrollbars
-   Firefox only takes the auto/thin keywords, so it gets the wider of the two
-   and Chromium gets the exact --lcr-scrollbar width. */
+   SillyTavern styles the thumb through ::-webkit-scrollbar-thumb:vertical
+   and :horizontal. A plain ::-webkit-scrollbar-thumb loses to those on
+   specificity no matter the source order, so the rules below carry the same
+   pseudo-classes. Firefox only takes the auto/thin keywords, so it gets the
+   wider of the two while Chromium gets the exact --lcr-scrollbar width. */
 * {
     scrollbar-width: auto;
     scrollbar-color: var(--lcr-border) transparent;
@@ -251,14 +254,19 @@ input[type="range"] {
     background-color: rgba(0, 0, 0, .35);
 }
 
-*::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb:vertical,
+*::-webkit-scrollbar-thumb:horizontal {
     background-color: var(--lcr-border);
     border-radius: 0;
-    border: 3px solid transparent;
+    /* ST insets its thumb by 2px and clips to content-box, which eats the
+       extra width; a padding-box clip keeps the bar the full size. */
+    border: 2px solid transparent;
     background-clip: padding-box;
+    box-shadow: none;
 }
 
-*::-webkit-scrollbar-thumb:hover {
+*::-webkit-scrollbar-thumb:vertical:hover,
+*::-webkit-scrollbar-thumb:horizontal:hover {
     background-color: var(--lcr-accent);
 }
 
