@@ -40,6 +40,7 @@ jobs:
       - name: Extension files are at the repo root
         run: |
           test -f manifest.json || { echo "::error::manifest.json must be at the repo root - SillyTavern reads it from the root of the clone"; exit 1; }
+          test -f presets.js || { echo "::error::presets.js must be at the repo root - index.js imports it as './presets.js'"; exit 1; }
           node -e '
             const fs = require("fs");
             const m = JSON.parse(fs.readFileSync("manifest.json", "utf8"));
@@ -63,6 +64,9 @@ jobs:
       - name: Extension parses as an ES module
         run: node --input-type=module --check < index.js
 
+      - name: Presets parse as an ES module
+        run: node --input-type=module --check < presets.js
+
       - name: Theme preset is valid JSON
         run: node -e 'JSON.parse(require("fs").readFileSync("Lancer CompCon.json", "utf8"))'
 
@@ -75,3 +79,49 @@ jobs:
             echo "::error::'Lancer CompCon.json' is stale. Run 'node build-theme.js' and commit the result."
             exit 1
           fi
+
+      # Same argument as the theme above: presets/*.json is committed so the
+      # files can be read and traded on GitHub, but presets.js is what the
+      # extension loads. Editing one without the other ships presets that do
+      # not match the ones users actually get.
+      - name: Preset files are in sync with presets.js
+        run: |
+          node build-theme.js
+          if ! git diff --exit-code -- presets/; then
+            echo "::error::presets/ is stale. Run 'node build-theme.js' and commit the result."
+            exit 1
+          fi
+
+      # Presets are shared between strangers, so the extension refuses to write
+      # a value it cannot recognise. Check that the ones we ship pass that gate.
+      - name: Built-in presets satisfy the preset contract
+        run: |
+          node --input-type=module -e '
+            const { BUILTIN_PRESETS, PRESET_FORMAT, SCHEMA_VERSION } = await import("./presets.js");
+            const source = (await import("node:fs")).readFileSync("index.js", "utf8");
+            const ids = [...source.matchAll(/\{ id: [\x27"]([^\x27"]+)[\x27"], type: [\x27"]([^\x27"]+)[\x27"]/g)];
+            const options = new Map(ids.map(m => [m[1], m[2]]));
+            let bad = false;
+            if (!options.size) { console.log("::error::could not read the OPTIONS table out of index.js"); process.exit(1); }
+            for (const preset of BUILTIN_PRESETS) {
+              for (const field of ["slug", "name", "values"]) {
+                if (!preset[field]) { console.log(`::error::preset ${preset.slug ?? "?"} is missing "${field}"`); bad = true; }
+              }
+              if (preset.schemaVersion !== SCHEMA_VERSION) {
+                console.log(`::error::preset "${preset.name}" is stamped v${preset.schemaVersion}, but SCHEMA_VERSION is ${SCHEMA_VERSION}`);
+                bad = true;
+              }
+              for (const key of Object.keys(preset.values ?? {})) {
+                if (!options.has(key)) { console.log(`::error::preset "${preset.name}" sets "${key}", which no option declares`); bad = true; }
+              }
+              for (const [id, type] of options) {
+                if (preset.values?.[id] === undefined) { console.log(`::error::preset "${preset.name}" does not set "${id}"`); bad = true; }
+                else if (type === "color" && !/^#[0-9a-fA-F]{6}$/.test(preset.values[id])) {
+                  console.log(`::error::preset "${preset.name}" sets "${id}" to ${preset.values[id]}, which is not a 6-digit hex colour`);
+                  bad = true;
+                }
+              }
+            }
+            if (PRESET_FORMAT !== "lancer-theme-preset") { console.log("::error::PRESET_FORMAT changed - every preset in the wild becomes unreadable"); bad = true; }
+            process.exit(bad ? 1 : 0);
+          '

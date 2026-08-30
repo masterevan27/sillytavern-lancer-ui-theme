@@ -27,7 +27,8 @@ can run as an AI GM. Neither needs the other — this is a plain SillyTavern the
 | `lancer-compcon.css` | The theme. Source of truth — edit this, not the JSON. |
 | `Lancer CompCon.json` | Generated theme preset, imported through SillyTavern. |
 | `build-theme.js` | Bakes the CSS into `Lancer CompCon.json`; `--install` copies both parts into SillyTavern. |
-| `manifest.json`, `index.js`, `style.css` | The "Lancer Theme Controls" UI extension. These sit at the repo root so SillyTavern's extension installer can clone this repo directly. |
+| `manifest.json`, `index.js`, `style.css`, `presets.js` | The "Lancer Theme Controls" UI extension. These sit at the repo root so SillyTavern's extension installer can clone this repo directly. |
+| `presets/` | The bundled presets, as shareable files. Generated from `presets.js` - edit them there. |
 
 ## Install
 
@@ -63,6 +64,80 @@ node build-theme.js --install --st-root="D:/SillyTavern/data/default-user"
 
 `ST_ROOT` works as an environment variable instead. Without `--install` the
 script only regenerates `Lancer CompCon.json` next to itself.
+
+</details>
+
+## Presets
+
+A preset is the whole look — every switch, slider and swatch — as one small
+JSON file. Three ship with the extension and appear in the dropdown on a fresh
+install:
+
+| Preset | The look |
+| --- | --- |
+| **HORUS // Deep Signal** | Purple and terminal green, scanlines on, heavy gradient. The loudest of the three. |
+| **IPS-N // Cold Deck** | Cold blue, no glow, square avatars, faint grid. Reads as instrumentation. |
+| **GMS // Field Manual** | Austere: no glow, no grid, no gradient, flat red-on-black. Closest to print. |
+
+They live in [`presets/`](presets) if you want to read one before importing it.
+
+<details>
+<summary><strong>Saving, sharing and importing</strong></summary>
+
+Under **Extensions → Lancer Theme → Presets**:
+
+- **Saved look** — pick one and it applies immediately.
+- **Save** — stores the current settings under the name in the box. An
+  existing name is overwritten, after a confirmation.
+- **Export** / **Import** — a `.json` file, for sending someone the whole look.
+- **Copy** / **Load** — the same preset as a base64 share code, for pasting
+  into a Discord message.
+- **Include the character list when saving** — off by default, so a shared
+  preset carries the look and not your table's character names.
+
+A preset does not carry the master switch, so importing one never silently
+turns the extension on or off. Anything a preset leaves out falls back to the
+theme default rather than to whatever the last preset set, so switching
+between two presets never leaves a stray knob behind.
+
+Old presets keep working: each one records the settings version it was written
+against and is migrated forward on import, the same way stored settings are.
+
+</details>
+
+<details>
+<summary><strong>Why imports are filtered</strong></summary>
+
+These values are written into CSS custom properties on `<html>`, and the theme
+feeds those to `background` and `clip-path` — so a preset that could carry its
+own CSS could make your browser fetch a remote `url()`. Since presets are meant
+to be traded between strangers, every imported value has to get past a check
+before it is stored:
+
+- keys must be options this build declares; anything else is dropped
+- colours must match `#RRGGBB` — no other string is accepted
+- sliders are coerced to numbers and clamped to their own min and max
+- checkboxes become real booleans and only ever select between the option's
+  own two CSS values, so a preset can never supply CSS of its own
+- faction names must be keys the theme actually defines
+
+A file that survives none of that is rejected outright rather than partly
+applied. The presets bundled here go through the same gate as a downloaded one.
+
+</details>
+
+<details>
+<summary><strong>Editing the bundled presets</strong></summary>
+
+`presets/*.json` is **generated**. The source is `presets.js`, which is what
+the extension itself loads; edit a preset there and rebuild:
+
+```
+node build-theme.js
+```
+
+CI regenerates and diffs both `presets/` and `Lancer CompCon.json`, so a preset
+edited in only one of the two places fails the build.
 
 </details>
 

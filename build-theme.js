@@ -27,7 +27,7 @@ const EXTENSION_DIR = 'SillyTavern-Lancer-Theme';
 // Files the SillyTavern extension is made of. They live at the repo root so
 // that SillyTavern's "Install extension" can clone this repo directly — its
 // installer expects manifest.json at the root of whatever it cloned.
-const EXTENSION_FILES = ['manifest.json', 'index.js', 'style.css'];
+const EXTENSION_FILES = ['manifest.json', 'index.js', 'style.css', 'presets.js'];
 
 /**
  * Resolves SillyTavern's user-data directory for --install.
@@ -116,3 +116,21 @@ if (process.argv.includes('--install')) {
         console.log(`installed extension file -> ${path.join(extTarget, file)}`);
     }
 }
+
+// The presets people trade around ship as JSON so they can be read on GitHub
+// and imported without the extension, but presets.js is what the extension
+// itself loads — so the files are generated from it, the same way the theme is
+// generated from its CSS. CI rebuilds and diffs both.
+import('./presets.js').then(({ BUILTIN_PRESETS, PRESET_FORMAT }) => {
+    const presetDir = path.join(here, 'presets');
+    fs.mkdirSync(presetDir, { recursive: true });
+
+    for (const { slug, ...preset } of BUILTIN_PRESETS) {
+        const file = path.join(presetDir, `${slug}.json`);
+        fs.writeFileSync(file, `${JSON.stringify({ format: PRESET_FORMAT, ...preset }, null, 4)}\n`, 'utf8');
+        console.log(`wrote ${file}`);
+    }
+}).catch(error => {
+    console.error(`error: could not build presets - ${error.message}`);
+    process.exitCode = 1;
+});

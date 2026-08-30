@@ -15,34 +15,10 @@ import { eventSource, event_types, saveSettingsDebounced, characters } from '../
 import { extension_settings } from '../../../extensions.js';
 import { groups } from '../../../group-chats.js';
 import { power_user } from '../../../power-user.js';
+import { BUILTIN_PRESETS, PRESET_FORMAT, SCHEMA_VERSION } from './presets.js';
 
 const MODULE = 'lancer_theme';
 const STYLE_ID = 'lancer_theme_factions';
-
-/**
- * Bump when an option's meaning changes, so stored values that predate the
- * change get replaced instead of silently overriding the new default.
- *   2 - avatars: 'avatarPortrait' (bool) became 'avatarHeight' (ratio slider),
- *       and the default avatar grew from 96px square to 112 x 1.35.
- *   3 - default avatar width 112 -> 136px. Ratio is unchanged, so the height
- *       follows on its own; only avatarSize is reset.
- *   4 - chat surfaces went black and the message defaults went GMS red. Resets
- *       the panel/border/grid swatches and the two default factions, but only
- *       where they still hold the superseded values - a deliberate choice of
- *       teal, navy or anything else survives.
- *   5 - 'nameSize' (fixed px) became 'nameScale', a multiple of SillyTavern's
- *       --mainFontSize, so names track the Font Scale slider again. A stored
- *       px size is carried over as the equivalent ratio.
- *   6 - the two message defaults moved off GMS: characters now read as pilots
- *       and your own messages as Union. Only replaces the superseded GMS
- *       values, so a deliberate choice survives.
- *   7 - the AI GM card ships with a faction mapping. Only seeded where no
- *       mapping has been made at all, so a curated list is never touched.
- *   8 - the panel gradient was retuned: it now washes straight down into
- *       black rather than diagonally into purple. Only replaces the three
- *       superseded values, so a deliberate choice of angle or colour lives.
- */
-const SCHEMA_VERSION = 8;
 
 /** Lancer manufacturer / allegiance palette. Keys match --lcr-f-* in the theme CSS. */
 const FACTIONS = {
@@ -121,6 +97,9 @@ const OPTIONS = [
 
 const controlOptions = () => OPTIONS.filter(o => !o.section);
 
+/** The faction panel's CHAT_CHANGED handler, so a rebuild can drop the old one. */
+let nameRefresher = null;
+
 function defaultSettings() {
     const values = {};
     for (const opt of controlOptions()) {
@@ -141,7 +120,106 @@ function defaultSettings() {
         userFaction: 'union',
         /** faction for every character message that has no explicit mapping */
         defaultFaction: 'core',
+        /**
+         * Saved looks, by name.
+         * @type {Record<string, object>}
+         */
+        presets: {},
+        /**
+         * Built-in preset names this install has already been offered. A
+         * built-in is seeded once and recorded here, so deleting one sticks,
+         * while a preset added in a later release still arrives.
+         * @type {string[]}
+         */
+        seededPresets: [],
+        /** name of the preset last applied, for the dropdown */
+        activePreset: '',
+        /** carry the character -> faction map when saving or exporting */
+        presetIncludeFactions: false,
     };
+}
+
+/**
+ * Bump SCHEMA_VERSION (it lives in presets.js, shared with the preset format)
+ * when an option's meaning changes, and add a rung here, so stored values that
+ * predate the change get replaced instead of silently overriding the new
+ * default.
+ *   2 - avatars: 'avatarPortrait' (bool) became 'avatarHeight' (ratio slider),
+ *       and the default avatar grew from 96px square to 112 x 1.35.
+ *   3 - default avatar width 112 -> 136px. Ratio is unchanged, so the height
+ *       follows on its own; only avatarSize is reset.
+ *   4 - chat surfaces went black and the message defaults went GMS red. Resets
+ *       the panel/border/grid swatches and the two default factions, but only
+ *       where they still hold the superseded values - a deliberate choice of
+ *       teal, navy or anything else survives.
+ *   5 - 'nameSize' (fixed px) became 'nameScale', a multiple of SillyTavern's
+ *       --mainFontSize, so names track the Font Scale slider again. A stored
+ *       px size is carried over as the equivalent ratio.
+ *   6 - the two message defaults moved off GMS: characters now read as pilots
+ *       and your own messages as Union. Only replaces the superseded GMS
+ *       values, so a deliberate choice survives.
+ *   7 - the AI GM card ships with a faction mapping. Only seeded where no
+ *       mapping has been made at all, so a curated list is never touched.
+ *   8 - the panel gradient was retuned: it now washes straight down into
+ *       black rather than diagonally into purple. Only replaces the three
+ *       superseded values, so a deliberate choice of angle or colour lives.
+ *
+ * Runs over anything carrying `values`: the live settings, and an imported
+ * preset, which holds the same shape and can be just as old.
+ *
+ * @param {object} state settings or preset, migrated in place
+ * @returns {object} the same object
+ */
+function migrate(state) {
+    const defaults = defaultSettings();
+    const stored = state.schemaVersion ?? 1;
+
+    if (stored < 2 && state.values) {
+        delete state.values.avatarPortrait;
+        state.values.avatarHeight = defaults.values.avatarHeight;
+    }
+    if (stored < 3 && state.values) {
+        state.values.avatarSize = defaults.values.avatarSize;
+    }
+    if (stored < 4) {
+        const superseded = { colPanel: '#212D40', colBorder: '#364156' };
+        for (const [key, old] of Object.entries(superseded)) {
+            if (state.values?.[key] === old) {
+                state.values[key] = defaults.values[key];
+            }
+        }
+        if (state.defaultFaction === 'union') state.defaultFaction = defaults.defaultFaction;
+        if (state.userFaction === 'core') state.userFaction = defaults.userFaction;
+    }
+    if (stored < 5 && state.values) {
+        const px = state.values.nameSize;
+        delete state.values.nameSize;
+        if (typeof px === 'number' && px > 0) {
+            // SillyTavern's base is font_scale x 15px; express the old fixed
+            // size as that ratio, snapped to the slider's 0.05 step.
+            const base = 15 * (Number(power_user?.font_scale) || 1);
+            const ratio = Math.round((px / base) * 20) / 20;
+            state.values.nameScale = Math.min(2.5, Math.max(0.8, ratio));
+        }
+    }
+    if (stored < 6) {
+        if (state.defaultFaction === 'gms') state.defaultFaction = defaults.defaultFaction;
+        if (state.userFaction === 'gms-bright') state.userFaction = defaults.userFaction;
+    }
+    if (stored < 7 && state.factions && Object.keys(state.factions).length === 0) {
+        state.factions = { ...defaults.factions };
+    }
+    if (stored < 8 && state.values) {
+        const superseded = { mesGradientAngle: 135, mesGradientStrength: 0.35, colMesGradient: '#8A63D2' };
+        for (const [key, old] of Object.entries(superseded)) {
+            if (state.values[key] === old) {
+                state.values[key] = defaults.values[key];
+            }
+        }
+    }
+
+    state.schemaVersion = SCHEMA_VERSION;
+    return state;
 }
 
 function getSettings() {
@@ -151,52 +229,7 @@ function getSettings() {
     const settings = extension_settings[MODULE];
     const defaults = defaultSettings();
 
-    // Migrate stored values whose option changed shape or default.
-    const stored = settings.schemaVersion ?? 1;
-    if (stored < 2 && settings.values) {
-        delete settings.values.avatarPortrait;
-        settings.values.avatarHeight = defaults.values.avatarHeight;
-    }
-    if (stored < 3 && settings.values) {
-        settings.values.avatarSize = defaults.values.avatarSize;
-    }
-    if (stored < 4) {
-        const superseded = { colPanel: '#212D40', colBorder: '#364156' };
-        for (const [key, old] of Object.entries(superseded)) {
-            if (settings.values?.[key] === old) {
-                settings.values[key] = defaults.values[key];
-            }
-        }
-        if (settings.defaultFaction === 'union') settings.defaultFaction = defaults.defaultFaction;
-        if (settings.userFaction === 'core') settings.userFaction = defaults.userFaction;
-    }
-    if (stored < 5 && settings.values) {
-        const px = settings.values.nameSize;
-        delete settings.values.nameSize;
-        if (typeof px === 'number' && px > 0) {
-            // SillyTavern's base is font_scale x 15px; express the old fixed
-            // size as that ratio, snapped to the slider's 0.05 step.
-            const base = 15 * (Number(power_user?.font_scale) || 1);
-            const ratio = Math.round((px / base) * 20) / 20;
-            settings.values.nameScale = Math.min(2.5, Math.max(0.8, ratio));
-        }
-    }
-    if (stored < 6) {
-        if (settings.defaultFaction === 'gms') settings.defaultFaction = defaults.defaultFaction;
-        if (settings.userFaction === 'gms-bright') settings.userFaction = defaults.userFaction;
-    }
-    if (stored < 7 && settings.factions && Object.keys(settings.factions).length === 0) {
-        settings.factions = { ...defaults.factions };
-    }
-    if (stored < 8 && settings.values) {
-        const superseded = { mesGradientAngle: 135, mesGradientStrength: 0.35, colMesGradient: '#8A63D2' };
-        for (const [key, old] of Object.entries(superseded)) {
-            if (settings.values[key] === old) {
-                settings.values[key] = defaults.values[key];
-            }
-        }
-    }
-    settings.schemaVersion = SCHEMA_VERSION;
+    migrate(settings);
 
     for (const key of Object.keys(defaults)) {
         if (settings[key] === undefined) {
@@ -208,7 +241,209 @@ function getSettings() {
             settings.values[opt.id] = opt.def;
         }
     }
+
+    seedBuiltinPresets(settings);
     return settings;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Presets                                                                     */
+/* -------------------------------------------------------------------------- */
+
+const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
+
+/**
+ * Value keys no option declares any more, but that the migration ladder still
+ * reads. Listed so a file carrying only these is still recognised as a preset.
+ */
+const RETIRED_VALUE_KEYS = ['avatarPortrait', 'nameSize'];
+
+/** Does this `values` object hold anything this build can act on? */
+function looksLikePreset(values) {
+    const known = new Set([...controlOptions().map(opt => opt.id), ...RETIRED_VALUE_KEYS]);
+    return Object.keys(values).some(key => known.has(key));
+}
+
+/** Add any built-in this install has not been offered before. */
+function seedBuiltinPresets(settings) {
+    for (const builtin of BUILTIN_PRESETS) {
+        if (settings.seededPresets.includes(builtin.name)) {
+            continue;
+        }
+        settings.seededPresets.push(builtin.name);
+        // Through the same gate as an imported one: a built-in that drifts out
+        // of the contract should fail here, not in the CSS.
+        const preset = sanitizePreset(builtin);
+        if (preset && !settings.presets[preset.name]) {
+            settings.presets[preset.name] = preset;
+        }
+    }
+}
+
+/**
+ * Check a preset from anywhere untrusted - a downloaded file, a pasted share
+ * code, a built-in that has drifted.
+ *
+ * These values are written straight into CSS custom properties on <html>, and
+ * the theme feeds those to `background` and `clip-path`, so a preset that got
+ * through carrying its own CSS could pull a remote `url()`. Nothing is coerced
+ * and kept: a key has to be one this build declares, and a value has to
+ * survive its own type's check or it is dropped. Booleans never carry CSS at
+ * all - they only choose between the option's own `on` and `off` strings.
+ *
+ * @param {unknown} raw
+ * @param {string} fallbackName used when the preset does not name itself
+ * @returns {object|null} the cleaned preset, or null if nothing usable is left
+ */
+function sanitizePreset(raw, fallbackName = 'Imported preset') {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+    if (!raw.values || typeof raw.values !== 'object') return null;
+
+    const values = {};
+    for (const opt of controlOptions()) {
+        const value = raw.values[opt.id];
+        if (value === undefined) {
+            continue;
+        }
+        if (opt.type === 'bool') {
+            values[opt.id] = Boolean(value);
+        } else if (opt.type === 'range') {
+            const number = Number(value);
+            if (Number.isFinite(number)) {
+                values[opt.id] = Math.min(opt.max, Math.max(opt.min, number));
+            }
+        } else if (opt.type === 'color' && typeof value === 'string' && HEX_COLOR.test(value.trim())) {
+            values[opt.id] = value.trim();
+        }
+    }
+    if (!Object.keys(values).length) return null;
+
+    const name = typeof raw.name === 'string' && raw.name.trim()
+        ? raw.name.trim().slice(0, 60)
+        : fallbackName;
+
+    const preset = { format: PRESET_FORMAT, name, schemaVersion: SCHEMA_VERSION, values };
+
+    if (FACTIONS[raw.defaultFaction]) preset.defaultFaction = raw.defaultFaction;
+    if (FACTIONS[raw.userFaction]) preset.userFaction = raw.userFaction;
+
+    if (raw.factions && typeof raw.factions === 'object' && !Array.isArray(raw.factions)) {
+        const factions = {};
+        for (const [character, faction] of Object.entries(raw.factions)) {
+            if (character.trim() && character.length <= 128 && FACTIONS[faction]) {
+                factions[character] = faction;
+            }
+        }
+        if (Object.keys(factions).length) preset.factions = factions;
+    }
+
+    return preset;
+}
+
+/**
+ * Parse untrusted JSON text into a preset.
+ * @returns {object|null} null if it will not parse, or is not a preset
+ */
+function parsePreset(text, fallbackName) {
+    let raw;
+    try {
+        raw = JSON.parse(text);
+    } catch {
+        return null;
+    }
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+    if (raw.format && raw.format !== PRESET_FORMAT) return null;
+
+    if (!raw.values || typeof raw.values !== 'object' || !looksLikePreset(raw.values)) {
+        // Checked here rather than left to sanitising, because migrating first
+        // would fill an unrecognisable file with defaults and make it look
+        // like a preset that merely wants everything reset.
+        return null;
+    }
+
+    // Migrate before sanitising: the older rungs read keys (nameSize) that
+    // sanitising drops first, as no option declares them any more.
+    migrate(raw);
+    return sanitizePreset(raw, fallbackName);
+}
+
+/**
+ * The current look, as a shareable preset.
+ * @param {string} name
+ * @param {boolean} includeFactions carry the character -> faction map too
+ */
+function snapshotPreset(name, includeFactions) {
+    const settings = getSettings();
+    const preset = {
+        format: PRESET_FORMAT,
+        name,
+        schemaVersion: SCHEMA_VERSION,
+        values: { ...settings.values },
+        defaultFaction: settings.defaultFaction,
+        userFaction: settings.userFaction,
+    };
+    if (includeFactions) {
+        preset.factions = { ...settings.factions };
+    }
+    return preset;
+}
+
+/**
+ * Apply a preset over the live settings. Anything it does not carry falls back
+ * to the theme default, so switching presets never leaves a knob behind from
+ * the last one. The master switch is not a look, and is left alone.
+ */
+function applyPreset(preset) {
+    const settings = getSettings();
+    settings.values = { ...defaultSettings().values, ...preset.values };
+    if (preset.defaultFaction) settings.defaultFaction = preset.defaultFaction;
+    if (preset.userFaction) settings.userFaction = preset.userFaction;
+    if (preset.factions) settings.factions = { ...preset.factions };
+    settings.activePreset = settings.presets[preset.name] ? preset.name : '';
+    applyAll();
+    saveSettingsDebounced();
+}
+
+/** Base64 of the preset JSON, for pasting into a chat window. */
+function encodeShareCode(preset) {
+    const bytes = new TextEncoder().encode(JSON.stringify(preset));
+    let binary = '';
+    for (const byte of bytes) {
+        binary += String.fromCharCode(byte);
+    }
+    return btoa(binary);
+}
+
+/** Inverse of encodeShareCode. Throws on anything that is not base64. */
+function decodeShareCode(code) {
+    const binary = atob(code.replace(/\s+/g, ''));
+    const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+}
+
+/** A filename for a preset, from its name. */
+function slugify(name) {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'lancer-preset';
+}
+
+/** Toast through SillyTavern's if it is there, the console otherwise. */
+function notify(kind, message) {
+    const toast = globalThis.toastr?.[kind];
+    if (toast) {
+        toast(message, 'Lancer Theme');
+    } else {
+        console.log(`[Lancer Theme] ${message}`);
+    }
+}
+
+function downloadJson(filename, data) {
+    const blob = new Blob([`${JSON.stringify(data, null, 4)}\n`], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = el('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
 }
 
 /** Turn one option's stored value into the string written to its CSS variable. */
@@ -472,8 +707,204 @@ function buildFactionPanel(settings) {
     renderList();
     refreshNames();
 
+    // The panel is rebuilt whenever a preset lands, so drop the previous
+    // build's listener instead of stacking one per rebuild.
+    if (nameRefresher) {
+        eventSource.removeListener?.(event_types.CHAT_CHANGED, nameRefresher);
+    }
+    nameRefresher = refreshNames;
     eventSource.on(event_types.CHAT_CHANGED, refreshNames);
 
+    return wrap;
+}
+
+/**
+ * The preset row: pick a saved look, save the current one, and move presets
+ * in and out as files or share codes.
+ * @param {object} settings
+ * @param {() => void} rebuild redraws the panel, so the controls below show
+ *        the values a freshly applied preset just wrote
+ */
+function buildPresetPanel(settings, rebuild) {
+    const wrap = el('div', 'lancer-presets');
+
+    const factionsLabel = el('label', 'checkbox_label lancer-preset-factions');
+    const includeFactions = el('input');
+    includeFactions.type = 'checkbox';
+    includeFactions.checked = Boolean(settings.presetIncludeFactions);
+    includeFactions.addEventListener('change', () => {
+        settings.presetIncludeFactions = includeFactions.checked;
+        saveSettingsDebounced();
+    });
+    factionsLabel.append(includeFactions, el('span', null, 'Include the character list when saving'));
+
+    /* --- pick --- */
+    const pickRow = el('div', 'lancer-row');
+    pickRow.append(el('label', 'lancer-label', 'Saved look'));
+
+    const select = el('select', 'text_pole lancer-preset-select');
+    const names = Object.keys(settings.presets).sort((a, b) => a.localeCompare(b));
+    const placeholder = el('option', null, names.length ? '- select -' : '- none saved -');
+    placeholder.value = '';
+    select.append(placeholder);
+    for (const name of names) {
+        const option = el('option', null, name);
+        option.value = name;
+        select.append(option);
+    }
+    select.value = settings.presets[settings.activePreset] ? settings.activePreset : '';
+
+    select.addEventListener('change', () => {
+        const preset = settings.presets[select.value];
+        if (!preset) {
+            settings.activePreset = '';
+            saveSettingsDebounced();
+            return;
+        }
+        applyPreset(preset);
+        notify('success', `Applied "${preset.name}".`);
+        rebuild();
+    });
+    pickRow.append(select);
+
+    /** Store an incoming preset under its own name, then apply it. */
+    const storeAndApply = (preset) => {
+        if (settings.presets[preset.name] && !globalThis.confirm(`Overwrite the preset "${preset.name}"?`)) {
+            return;
+        }
+        settings.presets[preset.name] = preset;
+        applyPreset(preset);
+        notify('success', `Imported "${preset.name}".`);
+        rebuild();
+    };
+
+    /* --- save --- */
+    const saveRow = el('div', 'lancer-row lancer-adder lancer-preset-adder');
+    const nameInput = el('input', 'text_pole lancer-name-input');
+    nameInput.type = 'text';
+    nameInput.placeholder = 'Preset name';
+    nameInput.value = settings.activePreset || '';
+
+    /** Whatever the name box holds, or a fallback for the export filename. */
+    const workingName = () => nameInput.value.trim().slice(0, 60);
+
+    const saveButton = el('div', 'menu_button lancer-add', 'Save');
+    saveButton.title = 'Save the current settings under this name';
+    saveButton.addEventListener('click', () => {
+        const name = workingName();
+        if (!name) {
+            notify('warning', 'Give the preset a name first.');
+            return;
+        }
+        if (settings.presets[name] && !globalThis.confirm(`Overwrite the preset "${name}"?`)) {
+            return;
+        }
+        settings.presets[name] = snapshotPreset(name, includeFactions.checked);
+        settings.activePreset = name;
+        saveSettingsDebounced();
+        notify('success', `Saved "${name}".`);
+        rebuild();
+    });
+    saveRow.append(nameInput, saveButton);
+
+    /* --- file in / out --- */
+    const filePicker = el('input');
+    filePicker.type = 'file';
+    filePicker.accept = 'application/json,.json';
+    filePicker.style.display = 'none';
+    filePicker.addEventListener('change', async () => {
+        const file = filePicker.files?.[0];
+        filePicker.value = '';
+        if (!file) return;
+        const preset = parsePreset(await file.text(), file.name.replace(/\.json$/i, ''));
+        if (!preset) {
+            notify('error', 'That file is not a Lancer theme preset.');
+            return;
+        }
+        storeAndApply(preset);
+    });
+
+    const actions = el('div', 'lancer-row lancer-preset-actions');
+
+    const exportButton = el('div', 'menu_button', 'Export');
+    exportButton.title = 'Download the current settings as a preset file';
+    exportButton.addEventListener('click', () => {
+        const name = workingName() || 'Lancer preset';
+        downloadJson(`${slugify(name)}.json`, snapshotPreset(name, includeFactions.checked));
+    });
+
+    const importButton = el('div', 'menu_button', 'Import');
+    importButton.title = 'Load a preset file someone sent you';
+    importButton.addEventListener('click', () => filePicker.click());
+
+    const deleteButton = el('div', 'menu_button lancer-preset-delete', 'Delete');
+    deleteButton.title = 'Delete the selected preset';
+    deleteButton.addEventListener('click', () => {
+        const name = select.value;
+        if (!name || !settings.presets[name]) {
+            notify('warning', 'Pick a saved preset first.');
+            return;
+        }
+        if (!globalThis.confirm(`Delete the preset "${name}"?`)) {
+            return;
+        }
+        delete settings.presets[name];
+        if (settings.activePreset === name) {
+            settings.activePreset = '';
+        }
+        saveSettingsDebounced();
+        notify('success', `Deleted "${name}".`);
+        rebuild();
+    });
+
+    actions.append(exportButton, importButton, deleteButton);
+
+    /* --- share code, for pasting into a chat window --- */
+    const codeRow = el('div', 'lancer-row lancer-adder');
+    const codeInput = el('input', 'text_pole lancer-name-input');
+    codeInput.type = 'text';
+    codeInput.placeholder = 'Share code';
+
+    const copyButton = el('div', 'menu_button', 'Copy');
+    copyButton.title = 'Put the current settings in the box, and on the clipboard';
+    copyButton.addEventListener('click', async () => {
+        const code = encodeShareCode(snapshotPreset(workingName() || 'Lancer preset', includeFactions.checked));
+        codeInput.value = code;
+        codeInput.select();
+        try {
+            await navigator.clipboard.writeText(code);
+            notify('success', 'Share code copied.');
+        } catch {
+            // Clipboard access needs a secure context; the box still has it.
+            notify('info', 'Share code is in the box - copy it from there.');
+        }
+    });
+
+    const loadButton = el('div', 'menu_button', 'Load');
+    loadButton.title = 'Apply a share code someone posted';
+    loadButton.addEventListener('click', () => {
+        const code = codeInput.value.trim();
+        if (!code) return;
+        let json = '';
+        try {
+            json = decodeShareCode(code);
+        } catch {
+            json = '';
+        }
+        const preset = parsePreset(json, 'Shared preset');
+        if (!preset) {
+            notify('error', 'That share code did not decode to a preset.');
+            return;
+        }
+        codeInput.value = '';
+        storeAndApply(preset);
+    });
+
+    codeRow.append(codeInput, copyButton, loadButton);
+
+    const hint = el('div', 'lancer-hint', 'A preset carries the switches, sliders and palette - not the master switch.');
+
+    wrap.append(pickRow, saveRow, actions, codeRow, factionsLabel, hint, filePicker);
     return wrap;
 }
 
@@ -491,6 +922,20 @@ function buildSettingsPanel() {
 
     const content = el('div', 'inline-drawer-content');
 
+    // Redraw from scratch: a preset writes every control at once, and the
+    // inputs below only read their values as they are built.
+    const rebuild = () => {
+        // SillyTavern slides the drawer with jQuery, so 'open' lives in the
+        // icon's up/down class and the content's inline display, not on a class
+        // of ours. Reopen the rebuilt drawer only if it was open.
+        const wasOpen = icon.classList.contains('up') || content.style.display === 'block';
+        drawer.remove();
+        buildSettingsPanel();
+        if (wasOpen) {
+            document.querySelector('.lancer-theme-drawer .inline-drawer-toggle')?.click();
+        }
+    };
+
     // master switch
     const masterLabel = el('label', 'checkbox_label lancer-master');
     const master = el('input');
@@ -507,6 +952,10 @@ function buildSettingsPanel() {
     content.append(el('div', 'lancer-hint', 'Off: the theme falls back to the defaults written in its own CSS.'));
 
     const body = el('div', 'lancer-body');
+
+    body.append(el('div', 'lancer-section', 'Presets'));
+    body.append(buildPresetPanel(settings, rebuild));
+
     for (const opt of OPTIONS) {
         if (opt.section) {
             body.append(el('div', 'lancer-section', opt.section));
@@ -525,10 +974,10 @@ function buildSettingsPanel() {
         settings.factions = { ...fresh.factions };
         settings.userFaction = fresh.userFaction;
         settings.defaultFaction = fresh.defaultFaction;
+        settings.activePreset = '';
         applyAll();
         saveSettingsDebounced();
-        drawer.remove();
-        buildSettingsPanel();
+        rebuild();
     });
     body.append(reset);
 
