@@ -33,9 +33,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
+      - uses: actions/setup-node@v7
+ 
 
       # Root layout. Fails loudly rather than letting a reorganised tree ship.
       - name: Extension files are at the repo root
