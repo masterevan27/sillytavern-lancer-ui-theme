@@ -79,11 +79,11 @@
     --lcr-avatar-ratio: 1.35;   /* height as a multiple of width (1 = square) */
     --lcr-tint-strength: 0.14;  /* 0 - 0.5                        */
     /* The wash across a message panel. It starts at that message's own
-       faction tint and runs to --lcr-mes-gradient-color at the far corner;
+       faction tint and runs to --lcr-mes-gradient-color at the far edge;
        strength is how much of the far colour lands there, 0 - 1. */
-    --lcr-mes-gradient-color: #8A63D2;
-    --lcr-mes-gradient-strength: 0.35;
-    --lcr-mes-gradient-angle: 135deg;
+    --lcr-mes-gradient-color: #000000;
+    --lcr-mes-gradient-strength: 0.33;
+    --lcr-mes-gradient-angle: 180deg;
     --lcr-stripe-width: 3px;
     --lcr-scanline-strength: 0.05;
     --lcr-grid-strength: 0.04;

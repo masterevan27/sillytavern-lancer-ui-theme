@@ -38,8 +38,11 @@ const STYLE_ID = 'lancer_theme_factions';
  *       values, so a deliberate choice survives.
  *   7 - the AI GM card ships with a faction mapping. Only seeded where no
  *       mapping has been made at all, so a curated list is never touched.
+ *   8 - the panel gradient was retuned: it now washes straight down into
+ *       black rather than diagonally into purple. Only replaces the three
+ *       superseded values, so a deliberate choice of angle or colour lives.
  */
-const SCHEMA_VERSION = 7;
+const SCHEMA_VERSION = 8;
 
 /** Lancer manufacturer / allegiance palette. Keys match --lcr-f-* in the theme CSS. */
 const FACTIONS = {
@@ -76,8 +79,8 @@ const OPTIONS = [
     { id: 'tint', type: 'bool', label: 'Faction tint in panel', cssVar: '--lcr-on-tint', on: '1', off: '0', def: true },
     { id: 'tintStrength', type: 'range', label: 'Tint strength', cssVar: '--lcr-tint-strength', min: 0, max: 0.5, step: 0.01, unit: '', def: 0.14 },
     { id: 'mesGradient', type: 'bool', label: 'Gradient wash across panel', cssVar: '--lcr-on-mes-gradient', on: '1', off: '0', def: true },
-    { id: 'mesGradientStrength', type: 'range', label: 'Gradient strength', cssVar: '--lcr-mes-gradient-strength', min: 0, max: 1, step: 0.01, unit: '', def: 0.35 },
-    { id: 'mesGradientAngle', type: 'range', label: 'Gradient angle', cssVar: '--lcr-mes-gradient-angle', min: 0, max: 360, step: 5, unit: 'deg', def: 135 },
+    { id: 'mesGradientStrength', type: 'range', label: 'Gradient strength', cssVar: '--lcr-mes-gradient-strength', min: 0, max: 1, step: 0.01, unit: '', def: 0.33 },
+    { id: 'mesGradientAngle', type: 'range', label: 'Gradient angle', cssVar: '--lcr-mes-gradient-angle', min: 0, max: 360, step: 5, unit: 'deg', def: 180 },
     { id: 'brackets', type: 'bool', label: 'Corner brackets', cssVar: '--lcr-on-brackets', on: '1', off: '0', def: true },
     { id: 'nameRule', type: 'bool', label: 'Hairline under name', cssVar: '--lcr-on-namerule', on: '1', off: '0', def: true },
     { id: 'hazard', type: 'bool', label: 'Hazard stripes on system messages', cssVar: '--lcr-on-hazard', on: '1', off: '0', def: true },
@@ -105,7 +108,7 @@ const OPTIONS = [
     { id: 'colCtlActive', type: 'color', label: 'Controls hovered / selected', cssVar: '--lcr-ctl-active', def: '#7A3FBF' },
     { id: 'colCtlActiveEdge', type: 'color', label: 'Controls, selected edge', cssVar: '--lcr-ctl-active-edge', def: '#B57BFF' },
     { id: 'colPanel', type: 'color', label: 'Message panel', cssVar: '--lcr-panel', def: '#212121' },
-    { id: 'colMesGradient', type: 'color', label: 'Panel gradient, far end', cssVar: '--lcr-mes-gradient-color', def: '#8A63D2' },
+    { id: 'colMesGradient', type: 'color', label: 'Panel gradient, far end', cssVar: '--lcr-mes-gradient-color', def: '#000000' },
     { id: 'colBorder', type: 'color', label: 'Panel border', cssVar: '--lcr-border', def: '#424242' },
     { id: 'colText', type: 'color', label: 'Body text', cssVar: '--lcr-text', def: '#C9CBA3' },
     { id: 'colGrid', type: 'color', label: 'Chat grid', cssVar: '--lcr-grid-color', def: '#DD5562' },
@@ -180,6 +183,14 @@ function getSettings() {
     }
     if (stored < 7 && settings.factions && Object.keys(settings.factions).length === 0) {
         settings.factions = { ...defaults.factions };
+    }
+    if (stored < 8 && settings.values) {
+        const superseded = { mesGradientAngle: 135, mesGradientStrength: 0.35, colMesGradient: '#8A63D2' };
+        for (const [key, old] of Object.entries(superseded)) {
+            if (settings.values[key] === old) {
+                settings.values[key] = defaults.values[key];
+            }
+        }
     }
     settings.schemaVersion = SCHEMA_VERSION;
 
