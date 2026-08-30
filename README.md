@@ -166,14 +166,15 @@ transparent border (a border cannot hold one). `--lcr-on-stripe` and
 
 | Variable | Default | Use |
 | --- | --- | --- |
-| `--lcr-stripe-from` | `#FF2E63` | top of the stripe |
+| `--lcr-on-stripe-faction` | `0` | `1`: start at the message's faction colour instead |
+| `--lcr-stripe-from` | `#FF2E63` | top of the stripe, when the switch above is off |
 | `--lcr-stripe-to` | `#7A3FBF` | bottom of the stripe |
 | `--lcr-stripe-angle` | `180deg` | direction, top to bottom |
 
-The stripe no longer carries the faction colour — the name, brackets and
-avatar frame still do. To colour-code it again, set the top stop on the
-message rather than on `:root`, where a `var()` would resolve once for every
-message: `#chat .mes { --lcr-stripe-from: var(--lcr-mes-accent); }`
+**Stripe starts at faction colour** is off by default: every stripe reads the
+same, and faction coding lives on the name, brackets and avatar frame. Turn it
+on and each stripe starts at its own faction colour and still runs into
+`--lcr-stripe-to`.
 
 **Controls** — buttons, top-bar drawer icons, character rows, the composer and
 its send / options glyphs — sit red at rest and go purple when hovered or

@@ -67,6 +67,7 @@
     --lcr-on-namerule: 1;       /* hairline under the name header    */
     --lcr-on-avatar-frame: 1;   /* faction frame around the avatar   */
     --lcr-on-mes-gradient: 1;   /* colour wash across message panels */
+    --lcr-on-stripe-faction: 0; /* 1: stripe starts at the faction colour */
 
     /* --- KEYWORD TOGGLES: "off" value given in the comment --- */
     --lcr-caps: uppercase;              /* off: none                    */
@@ -85,13 +86,10 @@
     --lcr-mes-gradient-strength: 0.33;
     --lcr-mes-gradient-angle: 180deg;
     --lcr-stripe-width: 3px;
-    /* The stripe down the message edge is a gradient, not a flat colour: it
-       runs from --lcr-stripe-from at the top to --lcr-stripe-to at the
-       bottom. To colour-code it by faction again, set the top stop on the
-       MESSAGE rather than here -
-           #chat .mes { --lcr-stripe-from: var(--lcr-mes-accent); }
-       - because a var() inside a :root custom property resolves against
-       :root, where every message would read the same default faction. */
+    /* The stripe down the message edge is a gradient, not a flat colour. It
+       runs from its top stop to --lcr-stripe-to at the bottom; the top stop
+       is either this fixed colour or the message's own faction colour,
+       whichever --lcr-on-stripe-faction picks. */
     --lcr-stripe-from: #FF2E63;
     --lcr-stripe-to: #7A3FBF;
     --lcr-stripe-angle: 180deg;
@@ -386,8 +384,16 @@ input[type="range"] {
        and the width slider goes on working; background-origin: border-box
        is what lets the layer reach out over it. */
     --lcr-stripe-size: calc(var(--lcr-stripe-width) * var(--lcr-on-stripe));
+    /* Top stop: the faction colour at --lcr-on-stripe-faction 1, the fixed
+       --lcr-stripe-from at 0. A mix rather than a swap because the switch
+       has to be read HERE, on the message. A keyword toggle holding
+       var(--lcr-mes-accent) would be written onto :root by the extension and
+       resolve there once, painting every stripe the same colour. */
+    --lcr-stripe-head: color-mix(in srgb,
+            var(--lcr-mes-accent) calc(var(--lcr-on-stripe-faction) * 100%),
+            var(--lcr-stripe-from));
     --lcr-mes-stripe: linear-gradient(var(--lcr-stripe-angle),
-            var(--lcr-stripe-from) 0%,
+            var(--lcr-stripe-head) 0%,
             var(--lcr-stripe-to) 100%);
     background-color: var(--lcr-mes-fill);
     background-image: var(--lcr-mes-stripe), var(--lcr-mes-wash);

@@ -77,6 +77,7 @@ const OPTIONS = [
     { id: 'stripe', type: 'bool', label: 'Faction edge stripe', cssVar: '--lcr-on-stripe', on: '1', off: '0', def: true },
     { id: 'stripeWidth', type: 'range', label: 'Stripe width', cssVar: '--lcr-stripe-width', min: 1, max: 12, step: 1, unit: 'px', def: 3 },
     { id: 'stripeAngle', type: 'range', label: 'Stripe gradient angle', cssVar: '--lcr-stripe-angle', min: 0, max: 360, step: 5, unit: 'deg', def: 180 },
+    { id: 'stripeFaction', type: 'bool', label: 'Stripe starts at faction colour', cssVar: '--lcr-on-stripe-faction', on: '1', off: '0', def: false },
     { id: 'tint', type: 'bool', label: 'Faction tint in panel', cssVar: '--lcr-on-tint', on: '1', off: '0', def: true },
     { id: 'tintStrength', type: 'range', label: 'Tint strength', cssVar: '--lcr-tint-strength', min: 0, max: 0.5, step: 0.01, unit: '', def: 0.14 },
     { id: 'mesGradient', type: 'bool', label: 'Gradient wash across panel', cssVar: '--lcr-on-mes-gradient', on: '1', off: '0', def: true },
