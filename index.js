@@ -102,6 +102,7 @@ const OPTIONS = [
     { id: 'colBorder', type: 'color', label: 'Panel border', cssVar: '--lcr-border', def: '#424242' },
     { id: 'colText', type: 'color', label: 'Body text', cssVar: '--lcr-text', def: '#C9CBA3' },
     { id: 'colGrid', type: 'color', label: 'Chat grid', cssVar: '--lcr-grid-color', def: '#DD5562' },
+    { id: 'colScrollbar', type: 'color', label: 'Scrollbar', cssVar: '--lcr-scrollbar-color', def: '#7B0016' },
 ];
 
 const controlOptions = () => OPTIONS.filter(o => !o.section);

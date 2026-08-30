@@ -76,6 +76,7 @@
     --lcr-grid-color: #DD5562;  /* the grid ruled behind the chat */
     --lcr-mes-gap: 10px;
     --lcr-scrollbar: 16px;      /* scrollbar thickness             */
+    --lcr-scrollbar-color: var(--lcr-f-gms-deep);  /* thumb; the swatch writes a hex here */
     /* Name size is a multiple of SillyTavern's own base font size, so the
        Font Scale slider still governs the whole chat. 1.6 x 15px = 24px at
        the default scale. Letter spacing is in em, so it follows along. */
@@ -235,14 +236,26 @@ input[type="range"] {
 }
 
 /* scrollbars
-   SillyTavern styles the thumb through ::-webkit-scrollbar-thumb:vertical
-   and :horizontal. A plain ::-webkit-scrollbar-thumb loses to those on
-   specificity no matter the source order, so the rules below carry the same
-   pseudo-classes. Firefox only takes the auto/thin keywords, so it gets the
-   wider of the two while Chromium gets the exact --lcr-scrollbar width. */
-* {
-    scrollbar-width: auto;
-    scrollbar-color: var(--lcr-border) transparent;
+   Two browser quirks shape this block.
+
+   1. Chromium ignores every ::-webkit-scrollbar rule on a scroller whose
+      standard `scrollbar-color` is set, and falls back to the OS scrollbar at
+      a fixed ~15px. That is why the old `* { scrollbar-color: ... }` here made
+      the width unsettable: the pseudo-elements below were never consulted.
+      The standard properties are therefore gated behind @supports so only
+      Firefox - which has no ::-webkit-scrollbar - ever sees them.
+   2. SillyTavern styles the thumb through ::-webkit-scrollbar-thumb:vertical
+      and :horizontal. A plain ::-webkit-scrollbar-thumb loses to those on
+      specificity whatever the source order, so the rules below carry the same
+      pseudo-classes.
+
+   Firefox takes only the auto/thin keywords, so it gets the wider of the two
+   while Chromium gets the exact --lcr-scrollbar width. */
+@supports not selector(::-webkit-scrollbar) {
+    * {
+        scrollbar-width: auto;
+        scrollbar-color: var(--lcr-scrollbar-color) transparent;
+    }
 }
 
 *::-webkit-scrollbar {
@@ -256,7 +269,7 @@ input[type="range"] {
 
 *::-webkit-scrollbar-thumb:vertical,
 *::-webkit-scrollbar-thumb:horizontal {
-    background-color: var(--lcr-border);
+    background-color: var(--lcr-scrollbar-color);
     border-radius: 0;
     /* ST insets its thumb by 2px and clips to content-box, which eats the
        extra width; a padding-box clip keeps the bar the full size. */
