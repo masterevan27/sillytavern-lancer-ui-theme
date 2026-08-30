@@ -85,6 +85,16 @@
     --lcr-mes-gradient-strength: 0.33;
     --lcr-mes-gradient-angle: 180deg;
     --lcr-stripe-width: 3px;
+    /* The stripe down the message edge is a gradient, not a flat colour: it
+       runs from --lcr-stripe-from at the top to --lcr-stripe-to at the
+       bottom. To colour-code it by faction again, set the top stop on the
+       MESSAGE rather than here -
+           #chat .mes { --lcr-stripe-from: var(--lcr-mes-accent); }
+       - because a var() inside a :root custom property resolves against
+       :root, where every message would read the same default faction. */
+    --lcr-stripe-from: #FF2E63;
+    --lcr-stripe-to: #7A3FBF;
+    --lcr-stripe-angle: 180deg;
     --lcr-scanline-strength: 0.05;
     --lcr-grid-strength: 0.04;
     --lcr-grid-color: #DD5562;  /* the grid ruled behind the chat */
@@ -370,10 +380,23 @@ input[type="range"] {
     --lcr-mes-wash: linear-gradient(var(--lcr-mes-gradient-angle),
             var(--lcr-mes-fill) 0%,
             var(--lcr-mes-fill-far) 100%);
+    /* The edge stripe is painted as a background layer rather than as a
+       border colour, since a border cannot hold a gradient. The border is
+       still declared, transparent, so it keeps its place in the box model
+       and the width slider goes on working; background-origin: border-box
+       is what lets the layer reach out over it. */
+    --lcr-stripe-size: calc(var(--lcr-stripe-width) * var(--lcr-on-stripe));
+    --lcr-mes-stripe: linear-gradient(var(--lcr-stripe-angle),
+            var(--lcr-stripe-from) 0%,
+            var(--lcr-stripe-to) 100%);
     background-color: var(--lcr-mes-fill);
-    background-image: var(--lcr-mes-wash);
+    background-image: var(--lcr-mes-stripe), var(--lcr-mes-wash);
+    background-origin: border-box;
+    background-repeat: no-repeat, repeat;
+    background-position: left top, left top;
+    background-size: var(--lcr-stripe-size) 100%, auto;
     border: 1px solid var(--lcr-border);
-    border-left: calc(var(--lcr-stripe-width) * var(--lcr-on-stripe)) solid var(--lcr-mes-accent);
+    border-left: var(--lcr-stripe-size) solid transparent;
     border-radius: 0;
     margin: 0 6px var(--lcr-mes-gap) 6px;
     padding: 10px 12px 6px 12px;
@@ -647,11 +670,18 @@ input[type="range"] {
 
 /* system / narrator messages get hazard tape */
 #chat .mes[is_system="true"] {
+    /* Three layers here, so every background list has to be restated at the
+       same length - a shorter list repeats cyclically and would size the
+       hazard tape to the stripe. */
     background-image:
+        var(--lcr-mes-stripe),
         repeating-linear-gradient(45deg,
             rgba(212, 225, 87, calc(0.05 * var(--lcr-on-hazard))) 0 8px,
             transparent 8px 16px),
         var(--lcr-mes-wash);
+    background-repeat: no-repeat, repeat, repeat;
+    background-position: left top, left top, left top;
+    background-size: var(--lcr-stripe-size) 100%, auto, auto;
 }
 
 /* -----------------------------------------------------------------------------

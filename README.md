@@ -160,6 +160,21 @@ panels** and **Palette**:
 | `--lcr-mes-gradient-angle` | `180deg` | direction of the wash |
 | `--lcr-mes-gradient-color` | `#000000` | the far end |
 
+**The edge stripe** is a gradient too, painted as a background layer over a
+transparent border (a border cannot hold one). `--lcr-on-stripe` and
+`--lcr-stripe-width` still switch and size it:
+
+| Variable | Default | Use |
+| --- | --- | --- |
+| `--lcr-stripe-from` | `#FF2E63` | top of the stripe |
+| `--lcr-stripe-to` | `#7A3FBF` | bottom of the stripe |
+| `--lcr-stripe-angle` | `180deg` | direction, top to bottom |
+
+The stripe no longer carries the faction colour — the name, brackets and
+avatar frame still do. To colour-code it again, set the top stop on the
+message rather than on `:root`, where a `var()` would resolve once for every
+message: `#chat .mes { --lcr-stripe-from: var(--lcr-mes-accent); }`
+
 **Controls** — buttons, top-bar drawer icons, character rows, the composer and
 its send / options glyphs — sit red at rest and go purple when hovered or
 selected:
