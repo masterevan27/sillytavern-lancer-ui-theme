@@ -63,6 +63,7 @@ const OPTIONS = [
     { id: 'nameRule', type: 'bool', label: 'Hairline under name', cssVar: '--lcr-on-namerule', on: '1', off: '0', def: true },
     { id: 'hazard', type: 'bool', label: 'Hazard stripes on system messages', cssVar: '--lcr-on-hazard', on: '1', off: '0', def: true },
     { id: 'mesGap', type: 'range', label: 'Gap between messages', cssVar: '--lcr-mes-gap', min: 0, max: 32, step: 1, unit: 'px', def: 10 },
+    { id: 'swipeSplit', type: 'bool', label: 'Swipe arrows on opposite sides', cssVar: '--lcr-on-swipe-split', on: '1', off: '0', def: true },
 
     { section: 'Typography' },
     { id: 'caps', type: 'bool', label: 'Uppercase labels', cssVar: '--lcr-caps', on: 'uppercase', off: 'none', def: true },

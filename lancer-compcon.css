@@ -68,6 +68,7 @@
     --lcr-on-avatar-frame: 1;   /* faction frame around the avatar   */
     --lcr-on-mes-gradient: 1;   /* colour wash across message panels */
     --lcr-on-stripe-faction: 0; /* 1: stripe starts at the faction colour */
+    --lcr-on-swipe-split: 1;    /* 1: swipe arrows on opposite sides */
 
     /* --- KEYWORD TOGGLES: "off" value given in the comment --- */
     --lcr-caps: uppercase;              /* off: none                    */
@@ -582,10 +583,32 @@ input[type="range"] {
     border-top: 1px solid var(--lcr-border);
 }
 
-/* --- swipes --- */
+/* --- swipes ---
+   SillyTavern parks the left chevron at a fixed `left: 20px` inside the
+   message, which clears its own small round avatar. This theme's avatar is a
+   framed portrait up to 300px wide, so that offset lands the chevron on top
+   of the art and it disappears into it.
+
+   --lcr-on-swipe-split moves it clear, picking between two offsets from that
+   same left edge: past the avatar column (its width plus the wrapper's 12px
+   margin), or in from the right to sit beside the other chevron, which
+   shares this containing block. A 1/0 multiplier rather than a keyword pair,
+   so the arithmetic stays in the stylesheet: the extension writes the switch
+   and --lcr-avatar and nothing else, and the offset re-resolves against
+   whatever the avatar width slider is currently on. */
+#chat .mes .swipe_left {
+    left: calc(var(--lcr-on-swipe-split) * (var(--lcr-avatar) + 12px)
+             + (1 - var(--lcr-on-swipe-split)) * (100% - 72px));
+    right: auto;
+}
+
 #chat .mes .swipe_left,
 #chat .mes .swipe_right {
     color: var(--lcr-mes-accent);
+    /* Chevrons sit at 0.3 opacity over whatever the panel is doing under
+       them - a gradient wash, hazard tape, the tail of a long message. The
+       shadow keeps their edge readable without lifting that opacity. */
+    text-shadow: 0 0 3px rgba(0, 0, 0, .9);
 }
 
 .swipes-counter {

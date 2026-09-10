@@ -22,6 +22,7 @@
         "nameRule": true,
         "hazard": true,
         "mesGap": 12,
+        "swipeSplit": true,
         "caps": true,
         "namePrefix": true,
         "monoNames": true,

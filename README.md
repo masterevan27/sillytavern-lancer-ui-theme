@@ -291,6 +291,26 @@ at reds for the old single-hue chrome.
 
 </details>
 
+<details>
+<summary><strong>Where the swipe arrows sit</strong></summary>
+
+SillyTavern pins the left swipe chevron 20px in from the edge of a message,
+which clears its own small round avatar. This theme's avatar is a framed
+portrait up to 300px wide, so at that offset the chevron lands on the art and
+is easy to lose. **Swipe arrows on opposite sides**, under **Message panels**,
+decides where it goes instead:
+
+| `--lcr-on-swipe-split` | Where the left chevron lands |
+| --- | --- |
+| `1` (default) | just past the portrait, at the head of the message body |
+| `0` | in from the right, paired with the other chevron above the counter |
+
+On keeps SillyTavern's left / right split; off gathers both arrows into the
+bottom-right corner. The on position is measured from the avatar width, so
+moving the **Avatar width** slider carries the chevron along with it.
+
+</details>
+
 Turning the extension's master switch off removes every inline variable, so the
 theme falls back to what's written in `lancer-compcon.css`. Switching to a
 different SillyTavern theme drops the whole look regardless.
