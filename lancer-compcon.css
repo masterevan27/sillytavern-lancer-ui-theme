@@ -604,26 +604,40 @@ input[type="range"] {
    else, and the offset re-resolves against whatever the avatar width slider
    is currently on.
 
-   `left` is measured from the message's padding box, so the text column
-   starts three terms in - the panel's side padding, the portrait, then the
-   channel beside it. An earlier pass counted only the last two, which put
-   the arrow's edge exactly on the portrait's, close enough to read as
-   sitting on the art. Landing it on the text column instead lines it up
-   under the message body and leaves the whole channel as clearance. */
+   `left` is measured from the message's padding box, so the portrait's right
+   edge is the panel's side padding plus the portrait itself. That edge is
+   the anchor. It looks like it should sit on the art, and it would if the
+   arrow filled its box - but the box is 25px and the chevron glyph only
+   12.5px, centred, so the ink starts 6.25px in. That inset drops it into
+   the 22px channel between the portrait and the first character of text,
+   6.25px clear of one and 3.25px clear of the other, and it stays there at
+   every avatar width because both clearances are independent of it.
+
+   Adding the channel on top of this - landing the box on the text column
+   itself - is 12px too far: the same inset then carries the ink 8.75px over
+   the first character of the last line, which on any message taller than
+   the portrait is most of them. */
 #chat .mes .swipe_left {
-    left: calc(var(--lcr-on-swipe-split)
-                 * (var(--lcr-mes-pad-x) + var(--lcr-avatar) + var(--lcr-avatar-gap))
-             + (1 - var(--lcr-on-swipe-split)) * (100% - 72px));
+    left: calc(var(--lcr-on-swipe-split) * (var(--lcr-mes-pad-x) + var(--lcr-avatar))
+             + (1 - var(--lcr-on-swipe-split))
+                 * max(100% - 72px, var(--lcr-mes-pad-x) + var(--lcr-avatar)));
     right: auto;
 }
 
+/* The two chevrons and the counter between them are one row of controls, so
+   they ride one ladder. The shadow holds their edge over whatever the panel
+   is doing underneath - a gradient wash, hazard tape, the tail of a long
+   message - and the lift off ST's 0.3 is what makes the faction colour read
+   as a colour at all rather than a smudge on the tint. */
 #chat .mes .swipe_left,
 #chat .mes .swipe_right {
     color: var(--lcr-mes-accent);
-    /* Chevrons sit at 0.3 opacity over whatever the panel is doing under
-       them - a gradient wash, hazard tape, the tail of a long message. The
-       shadow keeps their edge readable without lifting that opacity. */
     text-shadow: 0 0 3px rgba(0, 0, 0, .9);
+    opacity: .55;
+}
+
+#chat .mes.last_swipe .swipe_right {
+    opacity: .9;
 }
 
 /* SillyTavern runs the counter on an opacity ladder - 0.3 at rest, 0.7 once
@@ -647,6 +661,21 @@ input[type="range"] {
 
 #chat .mes.last_swipe .swipes-counter {
     opacity: .9;
+}
+
+/* "Show swipe numbers on all messages" puts a counter on every message in the
+   scrollback and pins all but the live one to 0.3, so only the message you
+   can actually swipe reads bright. Lifting the ladder above overrode that on
+   every older message sitting on its newest swipe - which is most of them -
+   and flattened the whole column to one weight. Restored, at the resting
+   value, so the setting still says what it is for.
+
+   The counter only, not the chevrons beside it: the counter is on screen for
+   every message at once and is the part that turns into noise, while the
+   chevrons only appear on the message under the cursor, where being easy to
+   see is the entire job. */
+body.swipeAllMessages #chat .mes:not(.last_mes) .swipes-counter {
+    opacity: .3;
 }
 
 /* Restated so the picker's hover cue still reads as a lift from .9, not the

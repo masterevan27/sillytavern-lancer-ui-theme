@@ -69,6 +69,35 @@ script only regenerates `Lancer CompCon.json` next to itself.
 
 </details>
 
+## Updating
+
+The two halves update by different routes, and the theme half does not follow
+the extension.
+
+Updating the extension only refreshes `index.js` and friends, and those write
+CSS **variables** onto the page — every rule that reads them lives in the
+theme's `custom_css`. So a fix to `lancer-compcon.css` reaches you through the
+theme and nowhere else. An extension version bump on its own means the
+controls changed, not the look.
+
+Worse, SillyTavern does not read the theme file at run time. It copies
+`custom_css` into your settings when you pick the theme, and applies that copy
+on every load afterwards. Replacing the file therefore changes nothing until
+you select the theme again, and **Import** refuses outright if a theme of the
+same name already exists.
+
+So, to take a new version of the theme:
+
+1. Replace `Lancer CompCon.json` in `<SillyTavern>/data/<your-user>/themes/`
+   with the one from this repo. (`--install` above does this for you, but it
+   also drops the extension into `data/<your-user>/extensions/` — skip it if
+   you installed the extension through SillyTavern, or you will end up running
+   two copies.)
+2. Reload the browser, so SillyTavern re-reads the themes folder.
+3. **User Settings → Themes**, and pick **Lancer CompCon** again. This is the
+   step that copies the new CSS into your settings. Skipping it leaves the old
+   CSS applied and looks exactly like the update not working.
+
 ## Presets
 
 A preset is the whole look — every switch, slider and swatch — as one small
