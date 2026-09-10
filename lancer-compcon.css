@@ -365,6 +365,13 @@ input[type="range"] {
    5. Messages  -  the COMP/CON panel
    -------------------------------------------------------------------------- */
 #chat .mes {
+    /* The two gaps that set out the message's left edge: the panel's own side
+       padding, and the channel between the portrait and the text. They are
+       declared here rather than written inline so the swipe rule further down
+       can add them up to find where the text column starts - the arrow has to
+       land on that edge, and it cannot if either number is spelled twice. */
+    --lcr-mes-pad-x: 12px;
+    --lcr-avatar-gap: 12px;
     /* --lcr-mes-fill is the flat faction tint; --lcr-mes-wash runs from that
        to --lcr-mes-gradient-color across the panel. Both are declared on the
        message rather than on :root so they resolve against this message's own
@@ -406,7 +413,7 @@ input[type="range"] {
     border-left: var(--lcr-stripe-size) solid transparent;
     border-radius: 0;
     margin: 0 6px var(--lcr-mes-gap) 6px;
-    padding: 10px 12px 6px 12px;
+    padding: 10px var(--lcr-mes-pad-x) 6px var(--lcr-mes-pad-x);
     width: auto;
     box-shadow: 0 1px 0 rgba(0, 0, 0, .4);
 }
@@ -590,14 +597,22 @@ input[type="range"] {
    of the art and it disappears into it.
 
    --lcr-on-swipe-split moves it clear, picking between two offsets from that
-   same left edge: past the avatar column (its width plus the wrapper's 12px
-   margin), or in from the right to sit beside the other chevron, which
-   shares this containing block. A 1/0 multiplier rather than a keyword pair,
-   so the arithmetic stays in the stylesheet: the extension writes the switch
-   and --lcr-avatar and nothing else, and the offset re-resolves against
-   whatever the avatar width slider is currently on. */
+   same left edge: the start of the text column, or in from the right to sit
+   beside the other chevron, which shares this containing block. A 1/0
+   multiplier rather than a keyword pair, so the arithmetic stays in the
+   stylesheet: the extension writes the switch and --lcr-avatar and nothing
+   else, and the offset re-resolves against whatever the avatar width slider
+   is currently on.
+
+   `left` is measured from the message's padding box, so the text column
+   starts three terms in - the panel's side padding, the portrait, then the
+   channel beside it. An earlier pass counted only the last two, which put
+   the arrow's edge exactly on the portrait's, close enough to read as
+   sitting on the art. Landing it on the text column instead lines it up
+   under the message body and leaves the whole channel as clearance. */
 #chat .mes .swipe_left {
-    left: calc(var(--lcr-on-swipe-split) * (var(--lcr-avatar) + 12px)
+    left: calc(var(--lcr-on-swipe-split)
+                 * (var(--lcr-mes-pad-x) + var(--lcr-avatar) + var(--lcr-avatar-gap))
              + (1 - var(--lcr-on-swipe-split)) * (100% - 72px));
     right: auto;
 }
@@ -611,10 +626,34 @@ input[type="range"] {
     text-shadow: 0 0 3px rgba(0, 0, 0, .9);
 }
 
-.swipes-counter {
+/* SillyTavern runs the counter on an opacity ladder - 0.3 at rest, 0.7 once
+   you are on the newest swipe - over its own body colour. Recoloured to the
+   muted grey and laid over the faction wash, the resting rung came out close
+   to unreadable and the top rung was not much better. So: the khaki the
+   message body already uses, the chevrons' shadow to hold it off the wash,
+   and both rungs lifted, keeping the newest-swipe cue.
+
+   ID specificity because ST's own rules for these reach four classes
+   (`body.swipeAllMessages .mes:not(.last_mes) .swipes-counter`). The rules
+   that hide the counter outrank all of this with !important, so the fade in
+   and out still works. */
+#chat .mes .swipes-counter {
     font-family: var(--lcr-font-mono);
-    color: var(--lcr-subtle);
+    color: var(--lcr-text);
     letter-spacing: 0.1em;
+    opacity: .55;
+    text-shadow: 0 0 3px rgba(0, 0, 0, .9);
+}
+
+#chat .mes.last_swipe .swipes-counter {
+    opacity: .9;
+}
+
+/* Restated so the picker's hover cue still reads as a lift from .9, not the
+   dimming ST's own 0.7 would now be. */
+#chat .mes .swipes-counter.swipe-picker-enabled:hover,
+#chat .mes .swipes-counter.swipe-picker-enabled:focus-visible {
+    opacity: 1;
 }
 
 /* --- reasoning block reads like a readout --- */
@@ -638,7 +677,7 @@ input[type="range"] {
     width: var(--lcr-avatar);
     min-width: var(--lcr-avatar);
     max-width: var(--lcr-avatar);
-    margin-right: 12px;
+    margin-right: var(--lcr-avatar-gap);
 }
 
 #chat .mes .avatar {
