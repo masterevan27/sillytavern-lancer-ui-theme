@@ -225,17 +225,22 @@ dark GMS theme — not eyeballed. (Its other registered themes are `gms`,
 <details>
 <summary><strong>The nine tokens, and the faction colours</strong></summary>
 
-| Token | Hex | Use |
-| --- | --- | --- |
-| background | `#11151C` | app background |
-| surface | `#161C27` | chat surface |
-| panel | `#212D40` | message panel |
-| panel-border | `#364156` | borders |
-| text | `#C9CBA3` | khaki body text |
-| primary | `#802932` | app bar red |
-| accent | `#DD5562` | highlight red |
-| secondary | `#48A6A7` | teal, used for quotes |
-| core | `#D4E157` | core power yellow |
+The chat surfaces don't ship gms_dark's navy: the four base tokens run black
+instead, using that theme's own dark-panel (`#212121`) and pilot grey
+(`#424242`). The upstream column is what COMP/CON declares; the active column
+is what `lancer-compcon.css` and the extension default to.
+
+| Token | Upstream hex | Active default | Use |
+| --- | --- | --- | --- |
+| background | `#11151C` | `#0D0D0D` | app background |
+| surface | `#161C27` | `#141414` | chat surface |
+| panel | `#212D40` | `#212121` | message panel |
+| panel-border | `#364156` | `#424242` | borders |
+| text | `#C9CBA3` | same | khaki body text |
+| primary | `#802932` | same | app bar red |
+| accent | `#DD5562` | same | highlight red |
+| secondary | `#48A6A7` | same | teal, used for quotes |
+| core | `#D4E157` | same | core power yellow |
 
 Faction colours for per-character message coding are the Lancer manufacturers:
 GMS, IPS-Northstar, Smith-Shimano, Harrison Armory, HORUS, Union, NHP, plus
