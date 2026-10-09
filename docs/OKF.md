@@ -10,6 +10,8 @@ pins house profile 1.0.0 and OKF 0.2 in [.okf/tools/profile.json](../.okf/tools/
 The [profile](../.okf/tools/profile.md) defines metadata, navigation and evidence rules.
 The project release version is separate; follow [VERSIONING.md](VERSIONING.md).
 
+CI uses `actions/checkout@v7`, `actions/setup-node@v7` and Node 24.
+
 ## Install and validate
 
 Use Node 20.19 or later from the repository root:
