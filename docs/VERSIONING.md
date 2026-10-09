@@ -1,3 +1,8 @@
+---
+type: Reference
+title: "Release versioning"
+description: "Canonical version source and change increment policy for this repository."
+---
 # Versioning
 
 The extension release version remains the `version` field in `manifest.json`.

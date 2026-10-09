@@ -24,3 +24,7 @@ Use a unique event id for retries. Never edit `ai-agent-dashboard\data\state.jso
 Read [`docs/VERSIONING.md`](docs/VERSIONING.md) before completing project work.
 It identifies the machine-readable version source and any project-specific
 release automation.
+
+## Documentation bundle
+
+See the [documentation index](docs/index.md) and [OKF maintenance runbook](docs/OKF.md).

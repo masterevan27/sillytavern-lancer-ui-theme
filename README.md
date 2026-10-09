@@ -376,3 +376,7 @@ licence.
 LANCER is a trademark of Massif Press. COMP/CON is their character builder; the
 palette here was read off its GMS dark theme. This is an unofficial community
 tool with no affiliation to Massif Press or the SillyTavern project.
+
+## Documentation bundle
+
+See the [documentation index](docs/index.md) and [OKF maintenance runbook](docs/OKF.md).
