@@ -7,3 +7,6 @@ node_modules/
 # Claude Stuff
 # ---------------------------------------------------------------------------
 .claude/launch.json
+
+# Local Obsidian settings
+.obsidian/
